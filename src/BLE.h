@@ -87,4 +87,6 @@ class BLE {
         RgbColor secondaryStartingColor;
         RgbColor secondaryEndingColor;
         uint16_t secondarySpeed;
+
+        void updateExternParameters();
 };

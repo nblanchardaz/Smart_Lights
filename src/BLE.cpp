@@ -76,6 +76,7 @@ BLE::BLE() {
 }
 
 void BLE::updateParameters() {
+
     uint32_t temp;
     uint8_t red;
     uint8_t green;
@@ -117,19 +118,39 @@ void BLE::updateParameters() {
 
     // Protocol
     this->protocol = protocols_arr[this->protocolCharacteristic->getValue<uint8_t>(nullptr, true)];
+
+}
+
+void BLE::updateExternParameters() {
+
+    // First, update protocol
+    this->controller->protocol = this->protocol;
+
+    // Then, update the parameters of the strip object corresponding to the correct protocol
+    if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+        this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+    }
+    else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
+        this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+    }
+    return;
 }
 
 void BLE::printParameters() {
-    Serial.print("Starting Red: " + String(this->primaryStartingColor[0]));
-    Serial.print("Starting Green: " + String(this->primaryStartingColor[1]));
-    Serial.print("Starting Blue: " + String(this->primaryStartingColor[2]));
+
+    Serial.print("Starting Color: " + String(this->primaryStartingColor[0])) + " " + String(this->primaryStartingColor[1] + " " + String(this->primaryStartingColor[1]));
     Serial.print("Primary speed: " + String(this->primarySpeed));
+    Serial.print("Starting Color: " + String(this->secondaryStartingColor[0])) + " " + String(this->secondaryStartingColor[1] + " " + String(this->secondaryStartingColor[1]));
+    Serial.print("Secondary speed: " + String(this->secondarySpeed));
     Serial.print("Protocol: " + this->protocol);
+
 }
 
 void BLE::updateController(MasterLedController *in) {
+
     this->controller = in;
     return;
+    
 }
 
 

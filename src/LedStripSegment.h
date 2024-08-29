@@ -58,13 +58,41 @@ public:
         strip.Show();
     }
 
-    // void setParameters(string _primaryStarting, string _primaryEnding, string _secondaryStarting, string _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed) {
+    void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol) {
+        
+        this->primaryStarting = _primaryStarting;
+        this->primaryEnding = _primaryEnding;
+        this->secondaryStarting = _secondaryStarting;
+        this->secondaryEnding = _secondaryEnding;
+        this->primarySpeed = _primarySpeed;
+        this->secondarySpeed = _secondarySpeed;
+        this->protocol = _protocol;
 
-    // }
+    }
 
-    // void parseStringToBytes() {
+    RgbColor getPrimaryStartingColor() {
+        return this->primaryStarting;
+    }
 
-    // }
+    RgbColor getPrimaryEndingColor() {
+        return this->primaryEnding;
+    }
+
+    uint16_t getPrimarySpeed() {
+        return this->primarySpeed;
+    }
+
+    RgbColor getSecondaryStartingColor() {
+        return this->secondaryStarting;
+    }
+
+    RgbColor getSecondaryEndingColor() {
+        return this->secondaryEnding;
+    }
+
+    uint16_t getSecondarySpeed() {
+        return this->secondarySpeed;
+    }
 
     int start; ///< The start position of the segment.
     int end;   ///< The end position of the segment.

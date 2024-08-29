@@ -3,7 +3,7 @@
 #include "BLE.h"
 
 
-// MasterLedController &master = MasterLedController::getInstance();
+MasterLedController &master = MasterLedController::getInstance();
 BLE* bluetooth;
 
 void setup() {
@@ -33,7 +33,7 @@ void loop() {
   delay(1000);
 
   bluetooth->updateParameters();
-  // bluetooth->printParameters();
-  master.loop();
+  bluetooth->printParameters();
+  // master.loop();
 
 }
