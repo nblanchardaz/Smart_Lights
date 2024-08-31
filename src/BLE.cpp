@@ -119,30 +119,38 @@ void BLE::updateParameters() {
     // Protocol
     this->protocol = protocols_arr[this->protocolCharacteristic->getValue<uint8_t>(nullptr, true)];
 
+    // Update parameters stored in the appropriate LED segment variable
+    this->updateExternParameters();
+
 }
 
 void BLE::updateExternParameters() {
 
     // First, update protocol
-    this->controller->protocol = this->protocol;
+    if (this->controller) {
+        this->controller->protocol = this->protocol;
 
-    // Then, update the parameters of the strip object corresponding to the correct protocol
-    if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-        this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
-    }
-    else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
-        this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+        // Then, update the parameters of the strip object corresponding to the correct protocol
+        if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+        }
+        else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
+            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+        }
     }
     return;
 }
 
 void BLE::printParameters() {
 
-    Serial.print("Starting Color: " + String(this->primaryStartingColor[0])) + " " + String(this->primaryStartingColor[1] + " " + String(this->primaryStartingColor[1]));
-    Serial.print("Primary speed: " + String(this->primarySpeed));
-    Serial.print("Starting Color: " + String(this->secondaryStartingColor[0])) + " " + String(this->secondaryStartingColor[1] + " " + String(this->secondaryStartingColor[1]));
-    Serial.print("Secondary speed: " + String(this->secondarySpeed));
-    Serial.print("Protocol: " + this->protocol);
+    Serial.print("Primary Start Color: " + String(this->primaryStartingColor[0]) + " " + String(this->primaryStartingColor[1]) + " " + String(this->primaryStartingColor[2]) + " ");
+    Serial.print("Primary End Color: " + String(this->primaryEndingColor[0]) + " " + String(this->primaryEndingColor[1]) + " " + String(this->primaryEndingColor[2]) + " ");
+    Serial.print("Primary Vel: " + String(this->primarySpeed) + " ");
+    Serial.print("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
+    Serial.print("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
+    Serial.print("Secondary Vel: " + String(this->secondarySpeed) + " ");
+    Serial.println("Protocol: " + this->protocol);
+    // Serial.println("");
 
 }
 

@@ -13,23 +13,14 @@ void setup() {
 
   bluetooth = new BLE();
 
-  // Receive LED strip format
-  // while (BLE->protocol == NULL) {
-  //   Serial.println("Waiting for protocol to be updated...");
-  //   delay(1000);
-  // }
-
-  // Set strip protocol
-  // master.protocol = bluetooth->protocol;
-
   // Update pointer to controller
-  // bluetooth->updateController(&master);
+  bluetooth->updateController(&master);
 
 }
 
 void loop() {
 
-  Serial.println("Looping...");
+  // Serial.println("Looping...");
   delay(1000);
 
   bluetooth->updateParameters();
