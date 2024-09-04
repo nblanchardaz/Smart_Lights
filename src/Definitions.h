@@ -11,5 +11,6 @@
 #define secondaryEndingUUID uint16_t(5)        // MUST BE 16, 32, or 128 BITS
 #define secondarySpeedUUID uint16_t(6)         // MUST BE 16, 32, or 128 BITS
 #define protocolUUID uint16_t(7)               // MUST BE 16, 32, OR 128 BITS
+#define updateFlagUUID uint16_t(8)
 #define SERVICE_UUID uint16_t(1234)             // MUST BE 16, 32, or 128 BITS
 #define DEVICE_NAME "LED CONTROLLER"

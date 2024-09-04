@@ -24,7 +24,9 @@ void loop() {
   delay(1000);
 
   bluetooth->updateParameters();
-  bluetooth->printParameters();
+  if (bluetooth->updateFlag) {
+      bluetooth->printParameters();
+  }
   // master.loop();
 
 }

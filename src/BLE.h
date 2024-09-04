@@ -60,6 +60,7 @@ class BLE {
         void printParameters();
         String protocol;
         String protocols_arr[2] = {"NeoEsp32Rmt0Ws2812xMethod", "NeoEsp32Rmt0Ws2811Method"};
+        bool updateFlag;
 
     private:
         NimBLEServer *pServer;
@@ -71,6 +72,7 @@ class BLE {
         NimBLECharacteristic *secondaryEndingColorCharacteristic;
         NimBLECharacteristic *secondarySpeedCharacteristic;
         NimBLECharacteristic *protocolCharacteristic;
+        NimBLECharacteristic *updateFlagCharacteristic;
         NimBLEAdvertising *pAdvertising;
         PrimaryStartingColorCallbacks pscc;
         PrimaryEndingColorCallbacks pecc;

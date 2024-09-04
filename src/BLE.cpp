@@ -21,6 +21,7 @@ BLE::BLE() {
     secondaryStartingColor = RgbColor(0, 0, 0);
     secondaryEndingColor = RgbColor(0, 0, 0);
     secondarySpeed = 0;
+    updateFlag = 0;
 
     // DEBUG
     Serial.println("Starting BLE Initialization...");
@@ -39,6 +40,7 @@ BLE::BLE() {
     secondaryEndingColorCharacteristic = pService->createCharacteristic(secondaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondarySpeedCharacteristic = pService->createCharacteristic(secondarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     protocolCharacteristic = pService->createCharacteristic(protocolUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    updateFlagCharacteristic = pService->createCharacteristic(updateFlagUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
     // Set callbacks
     primaryStartingColorCharacteristic->setCallbacks(&pscc);
@@ -121,6 +123,10 @@ void BLE::updateParameters() {
 
     // Update parameters stored in the appropriate LED segment variable
     this->updateExternParameters();
+
+    // Update flag
+    this->updateFlag = this->updateFlagCharacteristic->getValue<bool>(nullptr, true);
+    this->updateFlagCharacteristic->setValue(0);
 
 }
 
