@@ -14,19 +14,27 @@ void setup() {
   bluetooth = new BLE();
 
   // Update pointer to controller
+  Serial.println("Updating controller: ");
   bluetooth->updateController(&master);
 
 }
 
 void loop() {
 
-  // Serial.println("Looping...");
-  delay(1000);
+  Serial.println("Looping...");
+  delay(500);
 
+  Serial.println("Updating parameters...");
   bluetooth->updateParameters();
   if (bluetooth->updateFlag) {
+      Serial.println("Printing parameters...");
       bluetooth->printParameters();
   }
-  // master.loop();
+
+  Serial.println("About to do stuff: ");
+  master.doStuff();
+
+  // Serial.print("Protocol (loop): ");
+  // Serial.println(master.protocol);
 
 }

@@ -1,5 +1,5 @@
 #pragma once
-#define NUM_LEDS 20
+#define NUM_LEDS 50
 #define sigPinDef D0
 #define strobePinDef D2
 #define resetPinDef D3

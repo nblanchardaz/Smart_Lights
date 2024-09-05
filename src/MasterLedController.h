@@ -20,5 +20,5 @@ class MasterLedController {
         static MasterLedController &getInstance();
         void calculateStrip();
         void doStuff();
-        String protocol;
+        String protocol = "NeoEsp32Rmt0Ws2811Method";
 };

@@ -58,7 +58,7 @@ BLE::BLE() {
     pService->start();
 
     // DEBUG
-    protocolCharacteristic->setValue(99);
+    protocolCharacteristic->setValue(1);
     protocolCharacteristic->notify();
 
     // Start BLE advertising
@@ -90,6 +90,7 @@ void BLE::updateParameters() {
     green = (temp >> 8) & 0xFF;
     blue = (temp >> 16) & 0xFF;
     this->primaryStartingColor = RgbColor(red, green, blue);
+    /// Serial.println("Primary starting color: " + String(temp));
 
     // Primary ending color
     temp = this->primaryEndingColorCharacteristic->getValue<uint32_t>(nullptr, true);
@@ -132,11 +133,15 @@ void BLE::updateParameters() {
 
 void BLE::updateExternParameters() {
 
+    Serial.print("Controller protocol: ");
+    delay(100);
+    Serial.println(this->controller->protocol);
+
     // First, update protocol
     if (this->controller) {
         this->controller->protocol = this->protocol;
 
-        // Then, update the parameters of the strip object corresponding to the correct protocol
+        Then, update the parameters of the strip object corresponding to the correct protocol
         if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
             this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
         }
