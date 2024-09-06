@@ -58,16 +58,21 @@ public:
         strip.Show();
     }
 
-    void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol) {
+    void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol) {
         
-        this->primaryStarting = _primaryStarting;
-        this->primaryEnding = _primaryEnding;
-        this->secondaryStarting = _secondaryStarting;
-        this->secondaryEnding = _secondaryEnding;
-        this->primarySpeed = _primarySpeed;
-        this->secondarySpeed = _secondarySpeed;
-        this->protocol = _protocol;
+        // Serial.println(String(_primaryStarting[0]) + " " + String(_primaryEnding[0]) + " " + String(_primarySpeed) + " " + String(_secondaryStarting[0]) + " " + String(_secondaryEnding[0]) + " " + String(_secondarySpeed) + " " + String(_protocol));
+        // delay(10);
 
+        primaryStarting = _primaryStarting;
+        primaryEnding = _primaryEnding;
+        secondaryStarting = _secondaryStarting;
+        secondaryEnding = _secondaryEnding;
+        primarySpeed = _primarySpeed;
+        secondarySpeed = _secondarySpeed;
+        protocol = _protocol;
+        primarySensitivity = _primarySensitivity;
+
+        return;
     }
 
     RgbColor getPrimaryStartingColor() {
@@ -94,6 +99,10 @@ public:
         return this->secondarySpeed;
     }
 
+    uint16_t getPrimarySensitivity() {
+        return this->primarySensitivity;
+    }
+
     int start; ///< The start position of the segment.
     int end;   ///< The end position of the segment.
 
@@ -101,11 +110,12 @@ private:
     int pin;                            ///< The pin number.
     int direction;                      ///< The direction of the segment.
     NeoPixelBus<Feature, Method> strip; ///< The LED strip object.
-    RgbColor primaryStarting;
-    RgbColor primaryEnding;
-    RgbColor secondaryStarting;
-    RgbColor secondaryEnding;
-    uint16_t primarySpeed;
-    uint16_t secondarySpeed;
-    String protocol;
+    RgbColor primaryStarting = RgbColor(0, 0, 0);
+    RgbColor primaryEnding = RgbColor(0, 0, 0);
+    RgbColor secondaryStarting = RgbColor(0, 0, 0);
+    RgbColor secondaryEnding = RgbColor(0, 0, 0);
+    uint16_t primarySpeed = 0;
+    uint16_t secondarySpeed = 0;
+    uint16_t primarySensitivity = 0;
+    String protocol = "NeoEsp32Rmt0Ws2811Method";
 };

@@ -11,16 +11,15 @@ BLE::BLE() {
     // Make sure serial is available
     Serial.begin(9600);
 
-    // Initialize protocol
-    this->protocol = "NeoEsp32Rmt0Ws2811Method";
-
     // Initialize variables
     primaryStartingColor = RgbColor(0, 0, 0);
     primaryEndingColor = RgbColor(0, 0, 0);
     primarySpeed = 0;
     secondaryStartingColor = RgbColor(0, 0, 0);
     secondaryEndingColor = RgbColor(0, 0, 0);
+    protocol = "NeoEsp32Rmt0Ws2811Method";
     secondarySpeed = 0;
+    primarySensitivity = 0;
     updateFlag = 0;
 
     // DEBUG
@@ -36,11 +35,13 @@ BLE::BLE() {
     primaryStartingColorCharacteristic = pService->createCharacteristic(primaryStartingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE| NIMBLE_PROPERTY::NOTIFY);
     primaryEndingColorCharacteristic = pService->createCharacteristic(primaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     primarySpeedCharacteristic = pService->createCharacteristic(primarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    primarySensitivityCharacteristic = pService->createCharacteristic(primarySensitivityUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryStartingColorCharacteristic = pService->createCharacteristic(secondaryStartingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryEndingColorCharacteristic = pService->createCharacteristic(secondaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondarySpeedCharacteristic = pService->createCharacteristic(secondarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     protocolCharacteristic = pService->createCharacteristic(protocolUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     updateFlagCharacteristic = pService->createCharacteristic(updateFlagUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    firmwareCharacteristic = pService->createCharacteristic(firmwareVersionUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
     // Set callbacks
     primaryStartingColorCharacteristic->setCallbacks(&pscc);
@@ -60,6 +61,10 @@ BLE::BLE() {
     // DEBUG
     protocolCharacteristic->setValue(1);
     protocolCharacteristic->notify();
+
+    // Set firmware version
+    firmwareCharacteristic->setValue(FIRMWARE_VERSION);
+    firmwareCharacteristic->notify();
 
     // Start BLE advertising
     pAdvertising = NimBLEDevice::getAdvertising();
@@ -102,6 +107,9 @@ void BLE::updateParameters() {
     // Primary velocity
     this->primarySpeed = this->primarySpeedCharacteristic->getValue<uint16_t>(nullptr, true);
 
+    // Primary sensitivity
+    this->primarySensitivity = this->primarySensitivityCharacteristic->getValue<uint16_t>(nullptr, true);
+
     // Secondary starting color
     temp = this->secondaryStartingColorCharacteristic->getValue<uint32_t>(nullptr, true);
     red = temp & 0xFF;
@@ -125,28 +133,32 @@ void BLE::updateParameters() {
     // Update parameters stored in the appropriate LED segment variable
     this->updateExternParameters();
 
-    // Update flag
+}
+
+int BLE::checkUpdateFlag() {
+
     this->updateFlag = this->updateFlagCharacteristic->getValue<bool>(nullptr, true);
     this->updateFlagCharacteristic->setValue(0);
 
+    return this->updateFlag;
 }
 
 void BLE::updateExternParameters() {
 
-    Serial.print("Controller protocol: ");
-    delay(100);
-    Serial.println(this->controller->protocol);
 
     // First, update protocol
     if (this->controller) {
+
+        // DEBUG
+        // Serial.println("Updated protocol to: " + String(this->protocol));
         this->controller->protocol = this->protocol;
 
-        Then, update the parameters of the strip object corresponding to the correct protocol
+        // Then, update the parameters of the strip object corresponding to the correct protocol
         if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
         }
         else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
-            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
         }
     }
     return;
@@ -157,11 +169,11 @@ void BLE::printParameters() {
     Serial.print("Primary Start Color: " + String(this->primaryStartingColor[0]) + " " + String(this->primaryStartingColor[1]) + " " + String(this->primaryStartingColor[2]) + " ");
     Serial.print("Primary End Color: " + String(this->primaryEndingColor[0]) + " " + String(this->primaryEndingColor[1]) + " " + String(this->primaryEndingColor[2]) + " ");
     Serial.print("Primary Vel: " + String(this->primarySpeed) + " ");
+    Serial.print("Primary Sens: " + String(this->primarySensitivity) + " ");
     Serial.print("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
     Serial.print("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
     Serial.print("Secondary Vel: " + String(this->secondarySpeed) + " ");
     Serial.println("Protocol: " + this->protocol);
-    // Serial.println("");
 
 }
 

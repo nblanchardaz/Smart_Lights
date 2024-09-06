@@ -1,6 +1,10 @@
 #include "MasterLedController.h"
 
 MasterLedController::MasterLedController() {
+
+    // segment_12 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2812xMethod>(sigPinDef, 0, NUM_LEDS, 1);
+    segment_11 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2811Method>(sigPinDef, 0, NUM_LEDS, 1);
+
     return;
 }
 
@@ -12,14 +16,14 @@ MasterLedController &MasterLedController::getInstance()
 
 void MasterLedController::calculateStrip() {
 
-    Serial.println("Now calculating: ");
-
     // To enable music reactivity:
     this->chip->getResults();
-    this->chip->calculateLen();
 
     // WS2812x
     if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+
+        // Calculate result of music reactivity
+        this->chip->calculateLen(this->segment_12->getPrimarySensitivity());
 
         // Primary part of the segment (music reactivity)
         for (int j = this->segment_12->start; j < this->chip->len; j++)
@@ -36,18 +40,20 @@ void MasterLedController::calculateStrip() {
 
     // WS2811
     else if (this->protocol == "NeoEsp32Rmt0Ws2811Method") {
+
+        // Calculate result of music reactivity
+        this->chip->calculateLen(this->segment_11->getPrimarySensitivity());
+
         // Primary part of the segment (music reactivity)
         for (int j = this->segment_11->start; j < this->chip->len; j++)
         {
-            // this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getPrimaryStartingColor(), this->segment_11->getPrimaryEndingColor(), this->segment_11->getPrimarySpeed()));
-            this->segment_11->SetPixelColor(j, RgbColor(255, 0, 0));
+            this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getPrimaryStartingColor(), this->segment_11->getPrimaryEndingColor(), this->segment_11->getPrimarySpeed()));
         }
 
         // Secondary part of the segment (post music reactivity)
         for (int j = this->chip->len; j < this->segment_11->end; j++)
         {
-            // this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getSecondaryStartingColor(), this->segment_11->getSecondaryEndingColor(), this->segment_11->getSecondarySpeed()));
-            this->segment_11->SetPixelColor(j, RgbColor(0, 0, 255));
+            this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getSecondaryStartingColor(), this->segment_11->getSecondaryEndingColor(), this->segment_11->getSecondarySpeed()));
         }
     }
     else {
@@ -56,7 +62,7 @@ void MasterLedController::calculateStrip() {
 }
 
 void MasterLedController::showStrip() {
-    Serial.println("Now showing: ");
+
     if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
         this->segment_12->Show();
     }

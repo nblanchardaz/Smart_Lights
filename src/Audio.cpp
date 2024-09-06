@@ -4,6 +4,7 @@
 // timing constraints.
 
 #include "Audio.h"
+#include "Definitions.h"
 
 MSGEQ7::MSGEQ7(int reset, int strobe, int dcOut) {
 
@@ -26,6 +27,8 @@ MSGEQ7::MSGEQ7(int reset, int strobe, int dcOut) {
 
 int MSGEQ7::getResults(void) {
 
+    char text[5];
+
     // Begin by resettting the MSGEQ7 counter
     digitalWrite(this->resetPin, HIGH);
     delay(5);
@@ -40,6 +43,8 @@ int MSGEQ7::getResults(void) {
         digitalWrite(this->strobePin, HIGH);
 
         // Debug
+        // sprintf(text, "%04d", this->fft[i]);
+        // Serial.print(text);
         // Serial.print(this->fft[i]);
         // Serial.print(" ");
     }
@@ -50,10 +55,31 @@ int MSGEQ7::getResults(void) {
     return 0;
 }
 
-int MSGEQ7::calculateLen() {
+int MSGEQ7::calculateLen(uint16_t sensitivity) {
 
-    this->len = ((this->fft[0] + this->fft[1]) * 10 / 4096);
+    // Calculate the sum of the lowest two frequency bands.
+    int temp = (this->fft[0] + this->fft[1]);
 
-    return 0;
+    // Noise suppression: If the sum is less than 1500, do nothing.
+    if (temp < 1500) {
+        temp = 1500;
+    }
+    uint16_t res = ((temp - 1500) * 100 / (4096));
+
+    // If we get a length greater than NUM_LEDS, then set it equal to NUM_LEDS
+    if (res > NUM_LEDS) {
+        res = NUM_LEDS;
+    }
+
+    // Now, factor in sensitivity.
+    // sensitivty = 50 -> no transformation
+    // sensitivty < 50 -> reduce length of res
+    // sensitivity > 50 -> increase length of res
+    uint16_t effectiveSensitivty = sensitivity - 50;
+
+    // Can be increased/decreased by up to a factor of 5.
+    this->len = res + res * sensitivity / 12.5;
+
+    return this->len;
 }
 

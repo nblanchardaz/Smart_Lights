@@ -58,6 +58,7 @@ class BLE {
         void updateParameters();
         void updateController(MasterLedController *in);
         void printParameters();
+        int checkUpdateFlag();
         String protocol;
         String protocols_arr[2] = {"NeoEsp32Rmt0Ws2812xMethod", "NeoEsp32Rmt0Ws2811Method"};
         bool updateFlag;
@@ -65,15 +66,20 @@ class BLE {
     private:
         NimBLEServer *pServer;
         NimBLEService *pService;
+
         NimBLECharacteristic *primaryStartingColorCharacteristic;
         NimBLECharacteristic *primaryEndingColorCharacteristic;
         NimBLECharacteristic *primarySpeedCharacteristic;
+        NimBLECharacteristic *primarySensitivityCharacteristic;
         NimBLECharacteristic *secondaryStartingColorCharacteristic;
         NimBLECharacteristic *secondaryEndingColorCharacteristic;
         NimBLECharacteristic *secondarySpeedCharacteristic;
         NimBLECharacteristic *protocolCharacteristic;
         NimBLECharacteristic *updateFlagCharacteristic;
+        NimBLECharacteristic *firmwareCharacteristic;
+
         NimBLEAdvertising *pAdvertising;
+        
         PrimaryStartingColorCallbacks pscc;
         PrimaryEndingColorCallbacks pecc;
         PrimarySpeedCallbacks psc;
@@ -89,6 +95,7 @@ class BLE {
         RgbColor secondaryStartingColor;
         RgbColor secondaryEndingColor;
         uint16_t secondarySpeed;
+        uint16_t primarySensitivity;
 
         void updateExternParameters();
 };
