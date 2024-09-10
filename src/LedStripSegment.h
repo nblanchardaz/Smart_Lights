@@ -58,9 +58,9 @@ public:
         strip.Show();
     }
 
-    void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol) {
+    void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol, uint16_t _primaryNoiseFloor, uint8_t _mode) {
         
-        // Serial.println(String(_primaryStarting[0]) + " " + String(_primaryEnding[0]) + " " + String(_primarySpeed) + " " + String(_secondaryStarting[0]) + " " + String(_secondaryEnding[0]) + " " + String(_secondarySpeed) + " " + String(_protocol));
+        // Serial.println(String(_primaryStarting[0]) + " " + String(_primaryEnding[0]) + " " + String(_primarySpeed) + " " + String(_secondaryStarting[0]) + " " + String(_secondaryEnding[0]) + " " + String(_secondarySpeed) + " " + String(_protocol) + " " + String(_primaryNoiseFloor) + " " + String(_mode));
         // delay(10);
 
         primaryStarting = _primaryStarting;
@@ -71,6 +71,8 @@ public:
         secondarySpeed = _secondarySpeed;
         protocol = _protocol;
         primarySensitivity = _primarySensitivity;
+        primaryNoiseFloor = _primaryNoiseFloor;
+        mode = _mode;
 
         return;
     }
@@ -103,6 +105,14 @@ public:
         return this->primarySensitivity;
     }
 
+    uint16_t getPrimaryNoiseFloor() {
+        return this->primaryNoiseFloor;
+    }
+
+    uint8_t getMode() {
+        return this->mode;
+    }
+
     int start; ///< The start position of the segment.
     int end;   ///< The end position of the segment.
 
@@ -117,5 +127,7 @@ private:
     uint16_t primarySpeed = 0;
     uint16_t secondarySpeed = 0;
     uint16_t primarySensitivity = 0;
+    uint16_t primaryNoiseFloor = 0;
     String protocol = "NeoEsp32Rmt0Ws2811Method";
+    uint8_t mode = 0;
 };

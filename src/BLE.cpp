@@ -36,21 +36,24 @@ BLE::BLE() {
     primaryEndingColorCharacteristic = pService->createCharacteristic(primaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     primarySpeedCharacteristic = pService->createCharacteristic(primarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     primarySensitivityCharacteristic = pService->createCharacteristic(primarySensitivityUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    primaryNoiseFloorCharacteristic = pService->createCharacteristic(primaryNoiseFloorUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryStartingColorCharacteristic = pService->createCharacteristic(secondaryStartingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryEndingColorCharacteristic = pService->createCharacteristic(secondaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondarySpeedCharacteristic = pService->createCharacteristic(secondarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     protocolCharacteristic = pService->createCharacteristic(protocolUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     updateFlagCharacteristic = pService->createCharacteristic(updateFlagUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     firmwareCharacteristic = pService->createCharacteristic(firmwareVersionUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    modeCharacteristic = pService->createCharacteristic(modeUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
-    // Set callbacks
-    primaryStartingColorCharacteristic->setCallbacks(&pscc);
-    primaryEndingColorCharacteristic->setCallbacks(&pecc);
-    primarySpeedCharacteristic->setCallbacks(&psc);
-    secondaryStartingColorCharacteristic->setCallbacks(&sscc);
-    secondaryEndingColorCharacteristic->setCallbacks(&secc);
-    secondarySpeedCharacteristic->setCallbacks(&ssc);
-    protocolCharacteristic->setCallbacks(&pc);
+
+    // Set callbacks (UNUSED)
+    // primaryStartingColorCharacteristic->setCallbacks(&pscc);
+    // primaryEndingColorCharacteristic->setCallbacks(&pecc);
+    // primarySpeedCharacteristic->setCallbacks(&psc);
+    // secondaryStartingColorCharacteristic->setCallbacks(&sscc);
+    // secondaryEndingColorCharacteristic->setCallbacks(&secc);
+    // secondarySpeedCharacteristic->setCallbacks(&ssc);
+    // protocolCharacteristic->setCallbacks(&pc);
 
     // DEBUG
     Serial.println("BLE Characteristics created...");
@@ -58,13 +61,11 @@ BLE::BLE() {
     // Start BLE service
     pService->start();
 
-    // DEBUG
+    // Set protocol characteristic
     protocolCharacteristic->setValue(1);
-    protocolCharacteristic->notify();
 
     // Set firmware version
     firmwareCharacteristic->setValue(FIRMWARE_VERSION);
-    firmwareCharacteristic->notify();
 
     // Start BLE advertising
     pAdvertising = NimBLEDevice::getAdvertising();
@@ -110,6 +111,9 @@ void BLE::updateParameters() {
     // Primary sensitivity
     this->primarySensitivity = this->primarySensitivityCharacteristic->getValue<uint16_t>(nullptr, true);
 
+    // Primary noise floor
+    this->primaryNoiseFloor = this->primaryNoiseFloorCharacteristic->getValue<uint16_t>(nullptr, true);
+
     // Secondary starting color
     temp = this->secondaryStartingColorCharacteristic->getValue<uint32_t>(nullptr, true);
     red = temp & 0xFF;
@@ -129,6 +133,9 @@ void BLE::updateParameters() {
 
     // Protocol
     this->protocol = protocols_arr[this->protocolCharacteristic->getValue<uint8_t>(nullptr, true)];
+
+    // Mode
+    this->mode = this->modeCharacteristic->getValue<uint8_t>(nullptr, true);
 
     // Update parameters stored in the appropriate LED segment variable
     this->updateExternParameters();
@@ -155,10 +162,11 @@ void BLE::updateExternParameters() {
 
         // Then, update the parameters of the strip object corresponding to the correct protocol
         if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode);
         }
         else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
-            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol);
+            // this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode);
+            this->controller->segment_11->setParameters(RgbColor(0, 0, 0), RgbColor(0, 0, 0), 0, RgbColor(0, 0, 0), RgbColor(0, 0, 0), 0, 0, "NeoEsp32Rmt0Ws2811Method", 0, 0);
         }
     }
     return;
@@ -166,14 +174,46 @@ void BLE::updateExternParameters() {
 
 void BLE::printParameters() {
 
-    Serial.print("Primary Start Color: " + String(this->primaryStartingColor[0]) + " " + String(this->primaryStartingColor[1]) + " " + String(this->primaryStartingColor[2]) + " ");
-    Serial.print("Primary End Color: " + String(this->primaryEndingColor[0]) + " " + String(this->primaryEndingColor[1]) + " " + String(this->primaryEndingColor[2]) + " ");
-    Serial.print("Primary Vel: " + String(this->primarySpeed) + " ");
-    Serial.print("Primary Sens: " + String(this->primarySensitivity) + " ");
-    Serial.print("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
-    Serial.print("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
-    Serial.print("Secondary Vel: " + String(this->secondarySpeed) + " ");
+    Serial.println("Primary Start Color: " + String(this->primaryStartingColor[0]) + " " + String(this->primaryStartingColor[1]) + " " + String(this->primaryStartingColor[2]) + " ");
+    Serial.println("Primary End Color: " + String(this->primaryEndingColor[0]) + " " + String(this->primaryEndingColor[1]) + " " + String(this->primaryEndingColor[2]) + " ");
+    Serial.println("Primary Vel: " + String(this->primarySpeed) + " ");
+    Serial.println("Primary Sens: " + String(this->primarySensitivity) + " ");
+    Serial.println("Primary Noise Floor: " + String(this->primaryNoiseFloor) + " ");
+    Serial.println("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
+    Serial.println("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
+    Serial.println("Secondary Vel: " + String(this->secondarySpeed) + " ");
     Serial.println("Protocol: " + this->protocol);
+    Serial.println("Mode: " + String(this->mode));
+    Serial.println("");
+
+}
+
+int BLE::saveParameters(Preferences *preferences) {
+
+    preferences->putUChar("priStarRed", this->primaryStartingColor[0]);
+    preferences->putUChar("priStarGreen", this->primaryStartingColor[1]);
+    preferences->putUChar("priStarBlue", this->primaryStartingColor[2]);
+
+    preferences->putUChar("priEndRed", this->primaryEndingColor[0]);
+    preferences->putUChar("priEndGreen", this->primaryEndingColor[1]);
+    preferences->putUChar("priEndBlue", this->primaryEndingColor[2]);
+
+    preferences->putUChar("secStarRed", this->secondaryStartingColor[0]);
+    preferences->putUChar("secStarGreen", this->secondaryStartingColor[1]);
+    preferences->putUChar("secStarBlue", this->secondaryStartingColor[2]);
+
+    preferences->putUChar("secEndRed", this->secondaryEndingColor[0]);
+    preferences->putUChar("secEndGreen", this->secondaryEndingColor[1]);
+    preferences->putUChar("secEndBlue", this->secondaryEndingColor[2]);
+
+    preferences->putUShort("priSpeed", this->primarySpeed);
+    preferences->putUShort("secSpeed", this->secondarySpeed);
+    preferences->putUShort("priSens", this->primarySensitivity);
+    preferences->putUShort("priNoiseFloor", this->primaryNoiseFloor);
+    preferences->putString("protocol", this->protocol);
+    preferences->putUChar("mode", this->mode);
+
+    return 0;
 
 }
 

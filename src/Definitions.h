@@ -12,7 +12,9 @@
 #define secondarySpeedUUID uint16_t(6)         // MUST BE 16, 32, or 128 BITS
 #define protocolUUID uint16_t(7)               // MUST BE 16, 32, OR 128 BITS
 #define primarySensitivityUUID uint16_t(9)     // MUST BE 16, 32, OR 128 BITS
+#define primaryNoiseFloorUUID uint16_t(11)     // MUST BE 16, 32, OR 128 BITS
 #define updateFlagUUID uint16_t(8)             // MUST BE 16, 32, OR 128 BITS
+#define modeUUID uint16_t(12)                  // MUST BE 16, 32, OR 128 BITS
 #define SERVICE_UUID uint16_t(1234)            // MUST BE 16, 32, or 128 BITS
 #define DEVICE_NAME "LED CONTROLLER"
 

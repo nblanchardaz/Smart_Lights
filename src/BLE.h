@@ -3,6 +3,7 @@
 #include <NimBLEDevice.h>
 #include <NeoPixelBus.h>
 #include "MasterLedController.h"
+#include <Preferences.h>
 
 
 class ServerCallbacks: public NimBLEServerCallbacks {
@@ -59,6 +60,7 @@ class BLE {
         void updateController(MasterLedController *in);
         void printParameters();
         int checkUpdateFlag();
+        int saveParameters(Preferences* preferences);
         String protocol;
         String protocols_arr[2] = {"NeoEsp32Rmt0Ws2812xMethod", "NeoEsp32Rmt0Ws2811Method"};
         bool updateFlag;
@@ -71,12 +73,14 @@ class BLE {
         NimBLECharacteristic *primaryEndingColorCharacteristic;
         NimBLECharacteristic *primarySpeedCharacteristic;
         NimBLECharacteristic *primarySensitivityCharacteristic;
+        NimBLECharacteristic *primaryNoiseFloorCharacteristic;
         NimBLECharacteristic *secondaryStartingColorCharacteristic;
         NimBLECharacteristic *secondaryEndingColorCharacteristic;
         NimBLECharacteristic *secondarySpeedCharacteristic;
         NimBLECharacteristic *protocolCharacteristic;
         NimBLECharacteristic *updateFlagCharacteristic;
         NimBLECharacteristic *firmwareCharacteristic;
+        NimBLECharacteristic *modeCharacteristic;
 
         NimBLEAdvertising *pAdvertising;
         
@@ -96,6 +100,8 @@ class BLE {
         RgbColor secondaryEndingColor;
         uint16_t secondarySpeed;
         uint16_t primarySensitivity;
+        uint16_t primaryNoiseFloor;
+        uint8_t mode;
 
         void updateExternParameters();
 };

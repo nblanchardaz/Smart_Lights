@@ -23,7 +23,7 @@ class MSGEQ7 {
         int getResults();
 
         // Calculate how many pixels to affect
-        int calculateLen(uint16_t sensitivity);
+        int calculateLen(uint16_t sensitivity, uint16_t noiseFloor);
 
     private:
 

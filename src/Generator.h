@@ -5,7 +5,7 @@ class Generator {
 
   public:
     void update();
-    RgbColor calculatePixel(RgbColor startingColor, RgbColor endingColor, uint16_t velocity);
+    RgbColor calculatePixel(uint8_t mode, RgbColor startingColor, RgbColor endingColor, uint16_t velocity);
     Generator();
 
 };
