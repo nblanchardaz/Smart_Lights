@@ -1,5 +1,5 @@
 #pragma once
-#define NUM_LEDS 150
+#define MAX_LEDS 500
 #define sigPinDef D0
 #define strobePinDef D2
 #define resetPinDef D3
@@ -15,6 +15,7 @@
 #define primaryNoiseFloorUUID uint16_t(11)     // MUST BE 16, 32, OR 128 BITS
 #define updateFlagUUID uint16_t(8)             // MUST BE 16, 32, OR 128 BITS
 #define modeUUID uint16_t(12)                  // MUST BE 16, 32, OR 128 BITS
+#define stripLengthUUID uint16_t(13)           // MUST BE 16, 32, or 128 BITS
 #define SERVICE_UUID uint16_t(1234)            // MUST BE 16, 32, or 128 BITS
 #define DEVICE_NAME "LED CONTROLLER"
 

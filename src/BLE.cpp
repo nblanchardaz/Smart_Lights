@@ -44,7 +44,7 @@ BLE::BLE() {
     updateFlagCharacteristic = pService->createCharacteristic(updateFlagUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     firmwareCharacteristic = pService->createCharacteristic(firmwareVersionUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     modeCharacteristic = pService->createCharacteristic(modeUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
-
+    stripLengthCharacteristic = pService->createCharacteristic(stripLengthUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
     // Set callbacks (UNUSED)
     // primaryStartingColorCharacteristic->setCallbacks(&pscc);
@@ -83,7 +83,7 @@ BLE::BLE() {
     }
 }
 
-void BLE::updateParameters() {
+void BLE::updateParameters(Preferences* preferences) {
 
     uint32_t temp;
     uint8_t red;
@@ -134,6 +134,9 @@ void BLE::updateParameters() {
     // Protocol
     this->protocol = protocols_arr[this->protocolCharacteristic->getValue<uint8_t>(nullptr, true)];
 
+    // Strip length
+    this->numLeds = this->stripLengthCharacteristic->getValue<uint16_t>(nullptr, true);
+
     // Mode
     this->mode = this->modeCharacteristic->getValue<uint8_t>(nullptr, true);
 
@@ -162,11 +165,12 @@ void BLE::updateExternParameters() {
 
         // Then, update the parameters of the strip object corresponding to the correct protocol
         if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode);
+            this->controller->addWs2812x();
+            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds);
         }
         else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
-            // this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode);
-            this->controller->segment_11->setParameters(RgbColor(0, 0, 0), RgbColor(0, 0, 0), 0, RgbColor(0, 0, 0), RgbColor(0, 0, 0), 0, 0, "NeoEsp32Rmt0Ws2811Method", 0, 0);
+            this->controller->addWs2811();
+            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds);
         }
     }
     return;
@@ -184,6 +188,7 @@ void BLE::printParameters() {
     Serial.println("Secondary Vel: " + String(this->secondarySpeed) + " ");
     Serial.println("Protocol: " + this->protocol);
     Serial.println("Mode: " + String(this->mode));
+    Serial.println("Num LEDs: " + String(this->numLeds));
     Serial.println("");
 
 }
@@ -212,6 +217,7 @@ int BLE::saveParameters(Preferences *preferences) {
     preferences->putUShort("priNoiseFloor", this->primaryNoiseFloor);
     preferences->putString("protocol", this->protocol);
     preferences->putUChar("mode", this->mode);
+    preferences->putUShort("numLeds", this->numLeds);
 
     return 0;
 

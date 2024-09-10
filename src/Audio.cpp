@@ -55,7 +55,7 @@ int MSGEQ7::getResults(void) {
     return 0;
 }
 
-int MSGEQ7::calculateLen(uint16_t sensitivity, uint16_t noiseFloor) {
+int MSGEQ7::calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t numLeds) {
 
     // Calculate the sum of the lowest two frequency bands.
     int temp = (this->fft[0] + this->fft[1]);
@@ -67,11 +67,11 @@ int MSGEQ7::calculateLen(uint16_t sensitivity, uint16_t noiseFloor) {
     if (temp < noiseConstant) {
         temp = noiseConstant;
     }
-    uint16_t res = ((temp - noiseConstant) * 100 / (4096));
+    uint16_t res = ((temp - noiseConstant) * (numLeds / 2) / (4096));
 
     // If we get a length greater than NUM_LEDS, then set it equal to NUM_LEDS
-    if (res > NUM_LEDS) {
-        res = NUM_LEDS;
+    if (res > numLeds) {
+        res = numLeds;
     }
 
     // Now, factor in sensitivity.

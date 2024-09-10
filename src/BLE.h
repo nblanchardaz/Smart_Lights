@@ -56,7 +56,7 @@ class ProtocolCallbacks: public NimBLECharacteristicCallbacks {
 class BLE {
     public:
         BLE();
-        void updateParameters();
+        void updateParameters(Preferences* preferences);
         void updateController(MasterLedController *in);
         void printParameters();
         int checkUpdateFlag();
@@ -81,6 +81,7 @@ class BLE {
         NimBLECharacteristic *updateFlagCharacteristic;
         NimBLECharacteristic *firmwareCharacteristic;
         NimBLECharacteristic *modeCharacteristic;
+        NimBLECharacteristic *stripLengthCharacteristic;
 
         NimBLEAdvertising *pAdvertising;
         
@@ -102,6 +103,7 @@ class BLE {
         uint16_t primarySensitivity;
         uint16_t primaryNoiseFloor;
         uint8_t mode;
+        uint16_t numLeds;
 
         void updateExternParameters();
 };

@@ -19,6 +19,82 @@ void MasterLedController::setProtocol(String* _protocol) {
     this->protocol = *_protocol;
 }
 
+void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode, uint16_t* _numLeds) {
+    
+    // First, quantify the protocol
+    uint8_t quant = (this->protocol == "NeoEsp32Rmt0Ws2812xMethod");
+    
+        switch (quant) {
+            case 0:
+                this->segment_11 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2811Method>(sigPinDef, 0, MAX_LEDS, 1);
+                this->segment_11->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds);
+                Serial.println("Initialized as Ws2811.");
+                break;
+            case 1:
+                this->segment_12 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2812xMethod>(sigPinDef, 0, MAX_LEDS, 1);
+                this->segment_12->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds);
+                Serial.println("Initialized as Ws2812x.");
+                break;
+            default:
+                Serial.println("Protocol uninitialized.");
+        }
+    }
+
+void MasterLedController::addWs2811() {
+    // Delete other segment if it exists
+    if (this->segment_12) {
+        delete this->segment_12;
+    }
+    // Instantiate our new segment if it doesn't exist
+    if (this->segment_11 == nullptr) {
+        this->segment_11 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2811Method>(sigPinDef, 0, MAX_LEDS, 1);
+    }
+}
+
+void MasterLedController::addWs2812x() {
+    // Delete other segment if it exists
+    if (this->segment_11) {
+        delete this->segment_11;
+    }
+    // Instantiate our new segment if it doesn't exist
+    if (this->segment_12 == nullptr) {
+        this->segment_12 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2812xMethod>(sigPinDef, 0, MAX_LEDS, 1);
+    }
+}
+
+void MasterLedController::printParameters() {
+
+    if (this->protocol == "NeoEsp32Rmt0Ws2811Method") {
+        Serial.println("Primary Start Color: " + String((this->segment_11->getPrimaryStartingColor())[0]) + " " + String((this->segment_11->getPrimaryStartingColor())[1]) + " " + String((this->segment_11->getPrimaryStartingColor())[2]) + " ");
+        Serial.println("Primary End Color: " + String((this->segment_11->getPrimaryEndingColor())[0]) + " " + String((this->segment_11->getPrimaryEndingColor())[1]) + " " + String((this->segment_11->getPrimaryEndingColor())[2]) + " ");
+        Serial.println("Primary Vel: " + String(this->segment_11->getPrimarySpeed()) + " ");
+        Serial.println("Primary Sens: " + String(this->segment_11->getPrimarySensitivity()) + " ");
+        Serial.println("Primary Noise Floor: " + String(this->segment_11->getPrimaryNoiseFloor()) + " ");
+        Serial.println("Secondary Start Color: " + String((this->segment_11->getSecondaryStartingColor())[0]) + " " + String((this->segment_11->getSecondaryStartingColor())[1]) + " " + String((this->segment_11->getSecondaryStartingColor())[2]) + " ");
+        Serial.println("Starting End Color: " + String((this->segment_11->getSecondaryEndingColor())[0]) + " " + String((this->segment_11->getSecondaryEndingColor())[1]) + " " + String((this->segment_11->getSecondaryEndingColor())[2]) + " ");
+        Serial.println("Secondary Vel: " + String(this->segment_11->getSecondarySpeed()) + " ");
+        Serial.println("Protocol: " + this->protocol);
+        Serial.println("Mode: " + String(this->segment_11->getMode()));
+        Serial.println("Num LEDS: " + String(this->segment_11->getNumLeds()));
+        Serial.println("");
+    }
+    else if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+        Serial.println("Primary Start Color: " + String((this->segment_12->getPrimaryStartingColor())[0]) + " " + String((this->segment_12->getPrimaryStartingColor())[1]) + " " + String((this->segment_12->getPrimaryStartingColor())[2]) + " ");
+        Serial.println("Primary End Color: " + String((this->segment_12->getPrimaryEndingColor())[0]) + " " + String((this->segment_12->getPrimaryEndingColor())[1]) + " " + String((this->segment_12->getPrimaryEndingColor())[2]) + " ");
+        Serial.println("Primary Vel: " + String(this->segment_12->getPrimarySpeed()) + " ");
+        Serial.println("Primary Sens: " + String(this->segment_12->getPrimarySensitivity()) + " ");
+        Serial.println("Primary Noise Floor: " + String(this->segment_12->getPrimaryNoiseFloor()) + " ");
+        Serial.println("Secondary Start Color: " + String((this->segment_12->getSecondaryStartingColor())[0]) + " " + String((this->segment_12->getSecondaryStartingColor())[1]) + " " + String((this->segment_12->getSecondaryStartingColor())[2]) + " ");
+        Serial.println("Starting End Color: " + String((this->segment_12->getSecondaryEndingColor())[0]) + " " + String((this->segment_12->getSecondaryEndingColor())[1]) + " " + String((this->segment_12->getSecondaryEndingColor())[2]) + " ");
+        Serial.println("Secondary Vel: " + String(this->segment_12->getSecondarySpeed()) + " ");
+        Serial.println("Protocol: " + this->protocol);
+        Serial.println("Mode: " + String(this->segment_12->getMode()));
+        Serial.println("Num LEDS: " + String(this->segment_12->getNumLeds()));
+        Serial.println("");
+    }
+    return;
+}
+
 void MasterLedController::calculateStrip() {
 
     // To enable music reactivity:
@@ -28,7 +104,7 @@ void MasterLedController::calculateStrip() {
     if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
 
         // Calculate result of music reactivity
-        this->chip->calculateLen(this->segment_12->getPrimarySensitivity(), this->segment_12->getPrimaryNoiseFloor());
+        this->chip->calculateLen(this->segment_12->getPrimarySensitivity(), this->segment_12->getPrimaryNoiseFloor(), this->segment_12->getNumLeds());
 
         // Primary part of the segment (music reactivity)
         for (int j = this->segment_12->start; j < this->chip->len; j++)
@@ -47,7 +123,7 @@ void MasterLedController::calculateStrip() {
     else if (this->protocol == "NeoEsp32Rmt0Ws2811Method") {
 
         // Calculate result of music reactivity
-        this->chip->calculateLen(this->segment_11->getPrimarySensitivity(), this->segment_11->getPrimaryNoiseFloor());
+        this->chip->calculateLen(this->segment_11->getPrimarySensitivity(), this->segment_11->getPrimaryNoiseFloor(), this->segment_11->getNumLeds());
 
         // Primary part of the segment (music reactivity)
         for (int j = this->segment_11->start; j < this->chip->len; j++)
@@ -90,11 +166,11 @@ void MasterLedController::doStuff() {
 }
 
 
-void MasterLedControllerWs2811::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
-    this->segment_11->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
-}
+// void MasterLedControllerWs2811::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
+//     this->segment->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
+// }
 
 
-void MasterLedControllerWs2812x::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
-    this->segment_11->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
-}
+// void MasterLedControllerWs2812x::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
+//     this->segment->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
+// }

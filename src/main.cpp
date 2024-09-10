@@ -6,7 +6,7 @@
 
 
 // MasterLedController &master = MasterLedController::getInstance();
-MasterLedController* master;
+MasterLedController &master = MasterLedController::getInstance();
 BLE* bluetooth;
 Preferences preferences;
 
@@ -45,22 +45,21 @@ void setup() {
   uint16_t primaryNoiseFloor = preferences.getUShort("priNoiseFloor", 50);
   String protocol = preferences.getString("protocol", "NeoEsp32Rmt0Ws2811Method");
   uint8_t mode = preferences.getUChar("mode", 0);
+  uint16_t numLeds = preferences.getUShort("numLeds", 150);
+
 
   // Initialize MasterLedController
-  if (protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-    master = new MasterLedControllerWs2812x();
-  }
-  else if (protocol == "NeoEsp32Rmt0Ws2811Method") {
-    master = new MasterLedControllerWs2811();
-  }
-  master->setProtocol(&protocol);
-  master->loadParams(&primaryStarting, &primaryEnding, &primarySpeed, &primarySensitivity, &primaryNoiseFloor, &secondaryStarting, &secondaryEnding, &secondarySpeed, &mode);
+  master.setProtocol(&protocol);
+  master.loadParams(&primaryStarting, &primaryEnding, &primarySpeed, &primarySensitivity, &primaryNoiseFloor, &secondaryStarting, &secondaryEnding, &secondarySpeed, &mode, &numLeds);
 
   // Instantiate BLE object
   bluetooth = new BLE();
 
   // Update pointer to controller
-  bluetooth->updateController(master);
+  bluetooth->updateController(&master);
+
+  // Print initialized MasterLedController parameters
+  master.printParameters();
 
 }
 
@@ -70,12 +69,12 @@ void loop() {
   // If we have new BLE parameters, then update the parameters
   bluetooth->checkUpdateFlag();
   if (bluetooth->updateFlag) {
-      bluetooth->updateParameters();
+      bluetooth->updateParameters(&preferences);
       bluetooth->printParameters();
       bluetooth->saveParameters(&preferences);
   }
 
   // Calculate pixel values and show the results on the strip
-  master->doStuff();
+  // master.doStuff();
 
 }
