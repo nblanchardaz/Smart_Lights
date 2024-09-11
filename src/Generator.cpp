@@ -1,21 +1,22 @@
 #include "Generator.h"
 
+
+// Constructor
 Generator::Generator() {
-
     return;
-
 }
 
+// Currently unused
 void Generator::update() {
-
     return;
-
 }
 
+// Calculate color of a given pixel
 RgbColor Generator::calculatePixel(uint8_t mode, RgbColor startingColor, RgbColor endingColor, uint16_t velocity) {
 
     switch (mode) {
 
+        // Classic (0) mode
         case 0:
             // Let's use a sine function to create a smooth transition from startinColor, to endingColor, and back in an infinite loop.
             // component = a * sin( time ) + b
@@ -42,24 +43,16 @@ RgbColor Generator::calculatePixel(uint8_t mode, RgbColor startingColor, RgbColo
             return RgbColor(new_color[1], new_color[0], new_color[2]);
             break;
 
-            // LEGACY
-            // // Create a 'time factor', which oscillates between 0 and 1. Oscillation speed (frequency) is affected by the user-defined velocity.
-            // float timeFactor = sin(millis() * velocity / 100000);
-
-            // // Return a linear blend of the two colors
-            // return RgbColor::LinearBlend(startingColor, endingColor, timeFactor);
-
-            // return RgbColor()
+        // Waves (1) mode
         case 1:
             // Let's use a sine function to create 'waves' that propogate down the strip.
             // The 'waves' will change intensity based on observed frequency amplitudes.
             return RgbColor(255, 0, 255);
             break;
 
+        // Return white if invalid mode is supplied
         default:
-        // Return white
             return RgbColor(255, 255, 255);
             break;
     }
-
 }

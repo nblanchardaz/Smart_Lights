@@ -59,9 +59,6 @@ class LedStripSegment {
 
         void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol, uint16_t _primaryNoiseFloor, uint8_t _mode, uint16_t _numLeds) {
             
-            // Serial.println(String(_primaryStarting[0]) + " " + String(_primaryEnding[0]) + " " + String(_primarySpeed) + " " + String(_secondaryStarting[0]) + " " + String(_secondaryEnding[0]) + " " + String(_secondarySpeed) + " " + String(_protocol) + " " + String(_primaryNoiseFloor) + " " + String(_mode));
-            // delay(10);
-
             primaryStarting = _primaryStarting;
             primaryEnding = _primaryEnding;
             secondaryStarting = _secondaryStarting;

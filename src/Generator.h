@@ -1,6 +1,7 @@
 #pragma once
 #include "NeoPixelBus.h"
 
+
 class Generator {
 
   public:

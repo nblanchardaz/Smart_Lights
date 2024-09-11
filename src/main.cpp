@@ -5,10 +5,10 @@
 #include <Preferences.h>
 
 
-// MasterLedController &master = MasterLedController::getInstance();
 MasterLedController &master = MasterLedController::getInstance();
 BLE* bluetooth;
 Preferences preferences;
+
 
 void setup() {
 
@@ -72,12 +72,12 @@ void loop() {
   // If we have new BLE parameters, then update the parameters
   bluetooth->checkUpdateFlag();
   if (bluetooth->updateFlag) {
-      bluetooth->updateParameters(&preferences);
-      bluetooth->printParameters();
+      bluetooth->updateParameters();
+      master.printParameters();                   // Can also use bluetooth.printParameters();
       bluetooth->saveParameters(&preferences);
   }
 
   // Calculate pixel values and show the results on the strip
-  // master.doStuff();
+  master.doStuff();
 
 }

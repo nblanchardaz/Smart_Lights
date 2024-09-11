@@ -3,9 +3,12 @@
 // 7-band equalizer IC. Reference the MSGEQ7 datashet for exact
 // timing constraints.
 
+
 #include "Audio.h"
 #include "Definitions.h"
 
+
+// Constructor
 MSGEQ7::MSGEQ7(int reset, int strobe, int dcOut) {
 
     // Set ESP32 pin modes, and store these pins (we will need them to read data later)
@@ -20,14 +23,13 @@ MSGEQ7::MSGEQ7(int reset, int strobe, int dcOut) {
     digitalWrite(reset, LOW);
     digitalWrite(strobe, HIGH);
 
-    // Set color of affected pixels
-    this->c = RgbColor(255, 255, 255);
-
 }
 
+// Retrieve results from MSGEQ7
 int MSGEQ7::getResults(void) {
 
-    char text[5];
+    // Debug
+    // char text[5];
 
     // Begin by resettting the MSGEQ7 counter
     digitalWrite(this->resetPin, HIGH);
@@ -55,6 +57,7 @@ int MSGEQ7::getResults(void) {
     return 0;
 }
 
+// Calculate number of affected LEDs based on most recent MSGEQ7 results.
 int MSGEQ7::calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t numLeds) {
 
     // Calculate the sum of the lowest two frequency bands.

@@ -5,7 +5,7 @@
 
 #include "BLE.h"
 
-
+// Constructor
 BLE::BLE() {
     
     // Make sure serial is available
@@ -30,7 +30,6 @@ BLE::BLE() {
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
     NimBLEDevice::setSecurityAuth(false, false, false);
     pServer = NimBLEDevice::createServer();
-    pServer->setCallbacks(new ServerCallbacks());
     pService = pServer->createService(SERVICE_UUID);
     primaryStartingColorCharacteristic = pService->createCharacteristic(primaryStartingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE| NIMBLE_PROPERTY::NOTIFY);
     primaryEndingColorCharacteristic = pService->createCharacteristic(primaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
@@ -47,6 +46,7 @@ BLE::BLE() {
     stripLengthCharacteristic = pService->createCharacteristic(stripLengthUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
 
     // Set callbacks (UNUSED)
+    // pServer->setCallbacks(new ServerCallbacks());
     // primaryStartingColorCharacteristic->setCallbacks(&pscc);
     // primaryEndingColorCharacteristic->setCallbacks(&pecc);
     // primarySpeedCharacteristic->setCallbacks(&psc);
@@ -83,7 +83,8 @@ BLE::BLE() {
     }
 }
 
-void BLE::updateParameters(Preferences* preferences) {
+// Update BLE parameters to what the current characteristic values are.
+void BLE::updateParameters() {
 
     uint32_t temp;
     uint8_t red;
@@ -96,7 +97,6 @@ void BLE::updateParameters(Preferences* preferences) {
     green = (temp >> 8) & 0xFF;
     blue = (temp >> 16) & 0xFF;
     this->primaryStartingColor = RgbColor(red, green, blue);
-    /// Serial.println("Primary starting color: " + String(temp));
 
     // Primary ending color
     temp = this->primaryEndingColorCharacteristic->getValue<uint32_t>(nullptr, true);
@@ -145,6 +145,7 @@ void BLE::updateParameters(Preferences* preferences) {
 
 }
 
+// Check to see if the BLE update flag is set.
 int BLE::checkUpdateFlag() {
 
     this->updateFlag = this->updateFlagCharacteristic->getValue<bool>(nullptr, true);
@@ -153,8 +154,8 @@ int BLE::checkUpdateFlag() {
     return this->updateFlag;
 }
 
+// Update parameters stored in the MasterLedController (and subsequent LedStripSegment objects) to match what is stored in the BLE object.
 void BLE::updateExternParameters() {
-
 
     // First, update protocol
     if (this->controller) {
@@ -176,6 +177,7 @@ void BLE::updateExternParameters() {
     return;
 }
 
+// Print BLE parameters to the serial port.
 void BLE::printParameters() {
 
     Serial.println("Primary Start Color: " + String(this->primaryStartingColor[0]) + " " + String(this->primaryStartingColor[1]) + " " + String(this->primaryStartingColor[2]) + " ");
@@ -186,13 +188,14 @@ void BLE::printParameters() {
     Serial.println("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
     Serial.println("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
     Serial.println("Secondary Vel: " + String(this->secondarySpeed) + " ");
-    Serial.println("Protocol: " + this->protocol);
+    Serial.println("Protocol: " + String(this->protocol));
     Serial.println("Mode: " + String(this->mode));
     Serial.println("Num LEDs: " + String(this->numLeds));
     Serial.println("");
 
 }
 
+// Save strip parameters to flash memory.
 int BLE::saveParameters(Preferences *preferences) {
 
     preferences->putUChar("priStarRed", this->primaryStartingColor[0]);
@@ -223,15 +226,17 @@ int BLE::saveParameters(Preferences *preferences) {
 
 }
 
+// Update BLE characteristics with the values BLE is initialized to.
 void BLE::sendParameters() {
 
     int tempColor;
 
     if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
-       // Top selectors
+        // Top selectors
         this->stripLengthCharacteristic->setValue(this->controller->segment_12->getNumLeds());
         this->modeCharacteristic->setValue(this->controller->segment_12->getMode());
-        this->protocolCharacteristic->setValue(this->controller->protocol);
+        // Protocol value of 1 means WS2811, 0 means WS2812x
+        this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
         tempColor = ((this->controller->segment_12->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_12->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_12->getPrimaryStartingColor())[0] << 8);
@@ -240,7 +245,6 @@ void BLE::sendParameters() {
         this->primaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other primary parameters
-        Serial.println("Start color: " + String(tempColor));
         this->primarySpeedCharacteristic->setValue(this->controller->segment_12->getPrimarySpeed());
         this->primarySensitivityCharacteristic->setValue(this->controller->segment_12->getPrimarySensitivity());
         this->primaryNoiseFloorCharacteristic->setValue(this->controller->segment_12->getPrimaryNoiseFloor());
@@ -258,7 +262,7 @@ void BLE::sendParameters() {
         // Top selectors
         this->stripLengthCharacteristic->setValue(this->controller->segment_11->getNumLeds());
         this->modeCharacteristic->setValue(this->controller->segment_11->getMode());
-        this->protocolCharacteristic->setValue(this->controller->protocol);
+        this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
         tempColor = ((this->controller->segment_11->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_11->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_11->getPrimaryStartingColor())[0] << 8);
@@ -282,93 +286,98 @@ void BLE::sendParameters() {
     }
 }
 
+// Update pointer to the MasterLedController stored in each instance of BLE
 void BLE::updateController(MasterLedController *in) {
-
     this->controller = in;
     return;
-    
 }
 
 
-void ServerCallbacks::onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
-    Serial.print("Client address: ");
-    Serial.println(connInfo.getAddress().toString().c_str());
-    /** We can use the connection handle here to ask for different connection parameters.
-     *  Args: connection handle, min connection interval, max connection interval
-     *  latency, supervision timeout.
-     *  Units; Min/Max Intervals: 1.25 millisecond increments.
-     *  Latency: number of intervals allowed to skip.
-     *  Timeout: 10 millisecond increments, try for 5x interval time for best results.
-     */
-    pServer->updateConnParams(connInfo.getConnHandle(), 24, 48, 0, 60);
-};
-void ServerCallbacks::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
-    Serial.println("Client disconnected - start advertising");
-    NimBLEDevice::startAdvertising();
-};
-void ServerCallbacks::onMTUChange(uint16_t MTU, NimBLEConnInfo& connInfo) {
-    Serial.printf("MTU updated: %u for connection ID: %u\n", MTU, connInfo.getConnHandle());
-};
 
-/********************* Security handled here **********************
-****** Note: these are the same return values as defaults ********/
-uint32_t ServerCallbacks::onPassKeyDisplay() {
-    Serial.println("Server Passkey Display");
-    /** This should return a random 6 digit number for security
-     *  or make your own static passkey as done here.
-     */
-    return 123456;
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UNUSED //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ServerCallbacks::onConfirmPIN(const NimBLEConnInfo& connInfo, uint32_t pass_key) {
-    // TODO
-    return;
-};
+// // Server side callbacks for BLE.
+// void ServerCallbacks::onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
+//     Serial.print("Client address: ");
+//     Serial.println(connInfo.getAddress().toString().c_str());
+//     /** We can use the connection handle here to ask for different connection parameters.
+//      *  Args: connection handle, min connection interval, max connection interval
+//      *  latency, supervision timeout.
+//      *  Units; Min/Max Intervals: 1.25 millisecond increments.
+//      *  Latency: number of intervals allowed to skip.
+//      *  Timeout: 10 millisecond increments, try for 5x interval time for best results.
+//      */
+//     pServer->updateConnParams(connInfo.getConnHandle(), 24, 48, 0, 60);
+// };
+// void ServerCallbacks::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
+//     Serial.println("Client disconnected - start advertising");
+//     NimBLEDevice::startAdvertising();
+// };
+// void ServerCallbacks::onMTUChange(uint16_t MTU, NimBLEConnInfo& connInfo) {
+//     Serial.printf("MTU updated: %u for connection ID: %u\n", MTU, connInfo.getConnHandle());
+// };
 
-void ServerCallbacks::onAuthenticationComplete(const NimBLEConnInfo& connInfo) {
-    // TODO
-    return;
-};
+// /********************* Security handled here **********************
+// ****** Note: these are the same return values as defaults ********/
+// uint32_t ServerCallbacks::onPassKeyDisplay() {
+//     Serial.println("Server Passkey Display");
+//     /** This should return a random 6 digit number for security
+//      *  or make your own static passkey as done here.
+//      */
+//     return 123456;
+// };
+
+// void ServerCallbacks::onConfirmPIN(const NimBLEConnInfo& connInfo, uint32_t pass_key) {
+//     // TODO
+//     return;
+// };
+
+// void ServerCallbacks::onAuthenticationComplete(const NimBLEConnInfo& connInfo) {
+//     // TODO
+//     return;
+// };
 
 
-void PrimaryStartingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void PrimaryStartingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void PrimaryEndingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void PrimaryEndingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void PrimarySpeedCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void PrimarySpeedCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void SecondaryStartingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void SecondaryStartingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void SecondaryEndingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void SecondaryEndingColorCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void SecondarySpeedCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void SecondarySpeedCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };
 
-void ProtocolCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
-};
+// void ProtocolCallbacks::onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+//     Serial.print(pCharacteristic->getUUID().toString().c_str());
+//     Serial.print(": onWrite(), value: ");
+//     Serial.println(pCharacteristic->getValue().c_str());
+// };

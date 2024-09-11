@@ -6,57 +6,55 @@
 #include <Preferences.h>
 
 
-class ServerCallbacks: public NimBLEServerCallbacks {
-    public:
-        void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo);
-        void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason);
-        void onMTUChange(uint16_t MTU, NimBLEConnInfo& connInfo);
-        uint32_t onPassKeyDisplay();
-        void onConfirmPIN(const NimBLEConnInfo& connInfo, uint32_t pass_key);
-        void onAuthenticationComplete(const NimBLEConnInfo& connInfo);
-};
+// class ServerCallbacks: public NimBLEServerCallbacks {
+//     public:
+//         void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo);
+//         void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason);
+//         void onMTUChange(uint16_t MTU, NimBLEConnInfo& connInfo);
+//         uint32_t onPassKeyDisplay();
+//         void onConfirmPIN(const NimBLEConnInfo& connInfo, uint32_t pass_key);
+//         void onAuthenticationComplete(const NimBLEConnInfo& connInfo);
+// };
 
+// class PrimaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class PrimaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
+// class PrimaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class PrimaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
+// class PrimarySpeedCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class PrimarySpeedCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
+// class SecondaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class SecondaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
+// class SecondaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class SecondaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
+// class SecondarySpeedCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
-class SecondarySpeedCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
-
-class ProtocolCallbacks: public NimBLECharacteristicCallbacks {
-    public:
-        void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
-};
-
+// class ProtocolCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
 
 class BLE {
     public:
         BLE();
-        void updateParameters(Preferences* preferences);
+        void updateParameters();
         void updateController(MasterLedController *in);
         void printParameters();
         int checkUpdateFlag();
@@ -86,13 +84,13 @@ class BLE {
 
         NimBLEAdvertising *pAdvertising;
         
-        PrimaryStartingColorCallbacks pscc;
-        PrimaryEndingColorCallbacks pecc;
-        PrimarySpeedCallbacks psc;
-        SecondaryStartingColorCallbacks sscc;
-        SecondaryEndingColorCallbacks secc;
-        SecondarySpeedCallbacks ssc;
-        ProtocolCallbacks pc;
+        // PrimaryStartingColorCallbacks pscc;
+        // PrimaryEndingColorCallbacks pecc;
+        // PrimarySpeedCallbacks psc;
+        // SecondaryStartingColorCallbacks sscc;
+        // SecondaryEndingColorCallbacks secc;
+        // SecondarySpeedCallbacks ssc;
+        // ProtocolCallbacks pc;
 
         MasterLedController *controller;
         RgbColor primaryStartingColor;
@@ -108,3 +106,50 @@ class BLE {
 
         void updateExternParameters();
 };
+
+
+
+// class ServerCallbacks: public NimBLEServerCallbacks {
+//     public:
+//         void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo);
+//         void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason);
+//         void onMTUChange(uint16_t MTU, NimBLEConnInfo& connInfo);
+//         uint32_t onPassKeyDisplay();
+//         void onConfirmPIN(const NimBLEConnInfo& connInfo, uint32_t pass_key);
+//         void onAuthenticationComplete(const NimBLEConnInfo& connInfo);
+// };
+
+// class PrimaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class PrimaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class PrimarySpeedCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class SecondaryStartingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class SecondaryEndingColorCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class SecondarySpeedCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };
+
+// class ProtocolCallbacks: public NimBLECharacteristicCallbacks {
+//     public:
+//         void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo);
+// };

@@ -1,5 +1,7 @@
 #include "MasterLedController.h"
 
+
+// Constructor
 MasterLedController::MasterLedController() {
 
     // No work to do
@@ -10,15 +12,19 @@ MasterLedController::MasterLedController() {
     return;
 }
 
+// Singleton class
 MasterLedController &MasterLedController::getInstance() {   
     static MasterLedController instance;
     return instance;
 }
 
+// Update protocol saved in member variable
 void MasterLedController::setProtocol(String* _protocol) {
     this->protocol = *_protocol;
 }
 
+// Initialize stored parameters based on what is dug up out of flash memory.
+// Function can ONLY BE CALLED ONCE. Because there's no protection to prevent segment_11 from creating a new LedStripSegment if it already exists.
 void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode, uint16_t* _numLeds) {
     
     // First, quantify the protocol
@@ -40,10 +46,14 @@ void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _prim
         }
     }
 
+// Change protocol to WS2811.
+// Note: Must delete all other instances of LedStripSegment before creating a new one.
+// Haveing multiple instantiated at once will instantly crash the ESP32 with an RMT driver_install() error.
 void MasterLedController::addWs2811() {
     // Delete other segment if it exists
-    if (this->segment_12) {
+    if (this->segment_12 != nullptr) {
         delete this->segment_12;
+        this->segment_12 = nullptr;
     }
     // Instantiate our new segment if it doesn't exist
     if (this->segment_11 == nullptr) {
@@ -51,10 +61,14 @@ void MasterLedController::addWs2811() {
     }
 }
 
+// Change protocol to WS2812x.
+// Note: Must delete all other instances of LedStripSegment before creating a new one.
+// Haveing multiple instantiated at once will instantly crash the ESP32 with an RMT driver_install() error.
 void MasterLedController::addWs2812x() {
     // Delete other segment if it exists
-    if (this->segment_11) {
+    if (this->segment_11 != nullptr) {
         delete this->segment_11;
+        this->segment_11 = nullptr;
     }
     // Instantiate our new segment if it doesn't exist
     if (this->segment_12 == nullptr) {
@@ -62,6 +76,7 @@ void MasterLedController::addWs2812x() {
     }
 }
 
+// Print out strip parameters.
 void MasterLedController::printParameters() {
 
     if (this->protocol == "NeoEsp32Rmt0Ws2811Method") {
@@ -95,6 +110,7 @@ void MasterLedController::printParameters() {
     return;
 }
 
+// Figure out what each pixel color needs to be.
 void MasterLedController::calculateStrip() {
 
     // To enable music reactivity:
@@ -142,6 +158,7 @@ void MasterLedController::calculateStrip() {
     }
 }
 
+// Update the strip to show the calculated pixel values.
 void MasterLedController::showStrip() {
 
     if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
@@ -155,6 +172,7 @@ void MasterLedController::showStrip() {
     }
 }
 
+// Loop function: figure out pixel colors, then show those pixel colors on the strip.
 void MasterLedController::doStuff() {
 
     // Figure out what each pixel color should be, and set the pixels to their colors
@@ -164,13 +182,3 @@ void MasterLedController::doStuff() {
     showStrip();
 
 }
-
-
-// void MasterLedControllerWs2811::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
-//     this->segment->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
-// }
-
-
-// void MasterLedControllerWs2812x::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode) {
-//     this->segment->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode);
-// }

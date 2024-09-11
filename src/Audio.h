@@ -12,9 +12,6 @@ class MSGEQ7 {
 
         // Int to store length of affected pixels
         uint16_t len;
-
-        // Color that affected pixels are changed to
-        RgbColor c;
         
         // Constructor
         MSGEQ7(int reset, int strobe, int dcOut);
