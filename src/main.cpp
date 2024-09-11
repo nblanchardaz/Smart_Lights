@@ -52,14 +52,17 @@ void setup() {
   master.setProtocol(&protocol);
   master.loadParams(&primaryStarting, &primaryEnding, &primarySpeed, &primarySensitivity, &primaryNoiseFloor, &secondaryStarting, &secondaryEnding, &secondarySpeed, &mode, &numLeds);
 
+  // Print initialized MasterLedController parameters
+  master.printParameters();
+
   // Instantiate BLE object
   bluetooth = new BLE();
 
   // Update pointer to controller
   bluetooth->updateController(&master);
 
-  // Print initialized MasterLedController parameters
-  master.printParameters();
+  // Set BLE values for our initialized parameters
+  bluetooth->sendParameters();
 
 }
 

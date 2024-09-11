@@ -61,6 +61,7 @@ class BLE {
         void printParameters();
         int checkUpdateFlag();
         int saveParameters(Preferences* preferences);
+        void sendParameters();
         String protocol;
         String protocols_arr[2] = {"NeoEsp32Rmt0Ws2812xMethod", "NeoEsp32Rmt0Ws2811Method"};
         bool updateFlag;

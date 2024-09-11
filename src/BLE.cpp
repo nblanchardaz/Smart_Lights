@@ -223,6 +223,16 @@ int BLE::saveParameters(Preferences *preferences) {
 
 }
 
+void BLE::sendParameters() {
+
+    if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+        this->primarySpeedCharacteristic->setValue(this->controller->segment_12->getPrimarySpeed());
+    }
+    else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
+        this->primarySpeedCharacteristic->setValue(this->controller->segment_11->getPrimarySpeed());
+    }
+}
+
 void BLE::updateController(MasterLedController *in) {
 
     this->controller = in;
