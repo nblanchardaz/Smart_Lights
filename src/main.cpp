@@ -34,7 +34,7 @@ void setup() {
   uint8_t secondaryStartingBlue = preferences.getUChar("secStarBlue", 0);
   RgbColor secondaryStarting = RgbColor(secondaryStartingRed, secondaryStartingGreen, secondaryStartingBlue);
 
-  uint8_t secondaryEndingRed = preferences.getUChar("secondaryEndingRed", 0);
+  uint8_t secondaryEndingRed = preferences.getUChar("secondaryEndRed", 0);
   uint8_t secondaryEndingGreen = preferences.getUChar("secEndGreen", 0);
   uint8_t secondaryEndingBlue = preferences.getUChar("secEndBlue", 0);
   RgbColor secondaryEnding = RgbColor(secondaryEndingRed, secondaryEndingGreen, secondaryEndingBlue);

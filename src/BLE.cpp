@@ -225,11 +225,60 @@ int BLE::saveParameters(Preferences *preferences) {
 
 void BLE::sendParameters() {
 
+    int tempColor;
+
     if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
+       // Top selectors
+        this->stripLengthCharacteristic->setValue(this->controller->segment_12->getNumLeds());
+        this->modeCharacteristic->setValue(this->controller->segment_12->getMode());
+        this->protocolCharacteristic->setValue(this->controller->protocol);
+
+        // Primary colors
+        tempColor = ((this->controller->segment_12->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_12->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_12->getPrimaryStartingColor())[0] << 8);
+        this->primaryStartingColorCharacteristic->setValue(tempColor);
+        tempColor = ((this->controller->segment_12->getPrimaryEndingColor())[2] << 24) | ((this->controller->segment_12->getPrimaryEndingColor())[1] << 16) | ((this->controller->segment_12->getPrimaryEndingColor())[0] << 8);
+        this->primaryEndingColorCharacteristic->setValue(tempColor);
+
+        // Other primary parameters
+        Serial.println("Start color: " + String(tempColor));
         this->primarySpeedCharacteristic->setValue(this->controller->segment_12->getPrimarySpeed());
+        this->primarySensitivityCharacteristic->setValue(this->controller->segment_12->getPrimarySensitivity());
+        this->primaryNoiseFloorCharacteristic->setValue(this->controller->segment_12->getPrimaryNoiseFloor());
+   
+        // Secondary colors
+        tempColor = ((this->controller->segment_12->getSecondaryStartingColor())[2] << 24) | ((this->controller->segment_12->getSecondaryStartingColor())[1] << 16) | ((this->controller->segment_12->getSecondaryStartingColor())[0] << 8);
+        this->secondaryStartingColorCharacteristic->setValue(tempColor);
+        tempColor = ((this->controller->segment_12->getSecondaryEndingColor())[2] << 24) | ((this->controller->segment_12->getSecondaryEndingColor())[1] << 16) | ((this->controller->segment_12->getSecondaryEndingColor())[0] << 8);
+        this->secondaryEndingColorCharacteristic->setValue(tempColor);
+
+        // Other secondary parameters
+        this->secondarySpeedCharacteristic->setValue(this->controller->segment_12->getSecondarySpeed());
     }
     else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
+        // Top selectors
+        this->stripLengthCharacteristic->setValue(this->controller->segment_11->getNumLeds());
+        this->modeCharacteristic->setValue(this->controller->segment_11->getMode());
+        this->protocolCharacteristic->setValue(this->controller->protocol);
+
+        // Primary colors
+        tempColor = ((this->controller->segment_11->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_11->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_11->getPrimaryStartingColor())[0] << 8);
+        this->primaryStartingColorCharacteristic->setValue(tempColor);
+        tempColor = ((this->controller->segment_11->getPrimaryEndingColor())[2] << 24) | ((this->controller->segment_11->getPrimaryEndingColor())[1] << 16) | ((this->controller->segment_11->getPrimaryEndingColor())[0] << 8);
+        this->primaryEndingColorCharacteristic->setValue(tempColor);
+
+        // Other primary parameters
         this->primarySpeedCharacteristic->setValue(this->controller->segment_11->getPrimarySpeed());
+        this->primarySensitivityCharacteristic->setValue(this->controller->segment_11->getPrimarySensitivity());
+        this->primaryNoiseFloorCharacteristic->setValue(this->controller->segment_11->getPrimaryNoiseFloor());
+   
+        // Secondary colors
+        tempColor = ((this->controller->segment_11->getSecondaryStartingColor())[2] << 24) | ((this->controller->segment_11->getSecondaryStartingColor())[1] << 16) | ((this->controller->segment_11->getSecondaryStartingColor())[0] << 8);
+        this->secondaryStartingColorCharacteristic->setValue(tempColor);
+        tempColor = ((this->controller->segment_11->getSecondaryEndingColor())[2] << 24) | ((this->controller->segment_11->getSecondaryEndingColor())[1] << 16) | ((this->controller->segment_11->getSecondaryEndingColor())[0] << 8);
+        this->secondaryEndingColorCharacteristic->setValue(tempColor);
+
+        // Other secondary parameters
+        this->secondarySpeedCharacteristic->setValue(this->controller->segment_11->getSecondarySpeed());
     }
 }
 
