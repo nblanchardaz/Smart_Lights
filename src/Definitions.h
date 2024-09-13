@@ -13,6 +13,8 @@
 #define protocolUUID uint16_t(7)               // MUST BE 16, 32, OR 128 BITS
 #define primarySensitivityUUID uint16_t(9)     // MUST BE 16, 32, OR 128 BITS
 #define primaryNoiseFloorUUID uint16_t(11)     // MUST BE 16, 32, OR 128 BITS
+#define primaryWaveSpeedUUID uint16_t(14)      // MUST BE 16, 32, or 128 BITS
+#define primaryWavePeriodUUID uint16_t(15)     // MUST BE 16, 32, or 128 BITS
 #define updateFlagUUID uint16_t(8)             // MUST BE 16, 32, OR 128 BITS
 #define modeUUID uint16_t(12)                  // MUST BE 16, 32, OR 128 BITS
 #define stripLengthUUID uint16_t(13)           // MUST BE 16, 32, or 128 BITS

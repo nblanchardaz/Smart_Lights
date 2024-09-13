@@ -73,6 +73,8 @@ class BLE {
         NimBLECharacteristic *primarySpeedCharacteristic;
         NimBLECharacteristic *primarySensitivityCharacteristic;
         NimBLECharacteristic *primaryNoiseFloorCharacteristic;
+        NimBLECharacteristic *primaryWaveSpeedCharacteristic;
+        NimBLECharacteristic *primaryWavePeriodCharacteristic;
         NimBLECharacteristic *secondaryStartingColorCharacteristic;
         NimBLECharacteristic *secondaryEndingColorCharacteristic;
         NimBLECharacteristic *secondarySpeedCharacteristic;
@@ -101,6 +103,8 @@ class BLE {
         uint16_t secondarySpeed;
         uint16_t primarySensitivity;
         uint16_t primaryNoiseFloor;
+        uint16_t primaryWaveSpeed;
+        uint16_t primaryWavePeriod;
         uint8_t mode;
         uint16_t numLeds;
 

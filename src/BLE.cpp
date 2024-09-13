@@ -15,6 +15,10 @@ BLE::BLE() {
     primaryStartingColor = RgbColor(0, 0, 0);
     primaryEndingColor = RgbColor(0, 0, 0);
     primarySpeed = 0;
+    primaryNoiseFloor = 0;
+    primarySensitivity = 0;
+    primaryWaveSpeed = 0;
+    primaryWavePeriod = 0;
     secondaryStartingColor = RgbColor(0, 0, 0);
     secondaryEndingColor = RgbColor(0, 0, 0);
     protocol = "NeoEsp32Rmt0Ws2811Method";
@@ -36,6 +40,8 @@ BLE::BLE() {
     primarySpeedCharacteristic = pService->createCharacteristic(primarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     primarySensitivityCharacteristic = pService->createCharacteristic(primarySensitivityUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     primaryNoiseFloorCharacteristic = pService->createCharacteristic(primaryNoiseFloorUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    primaryWaveSpeedCharacteristic = pService->createCharacteristic(primaryWaveSpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    primaryWavePeriodCharacteristic = pService->createCharacteristic(primaryWavePeriodUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryStartingColorCharacteristic = pService->createCharacteristic(secondaryStartingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondaryEndingColorCharacteristic = pService->createCharacteristic(secondaryEndingUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     secondarySpeedCharacteristic = pService->createCharacteristic(secondarySpeedUUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
@@ -114,6 +120,12 @@ void BLE::updateParameters() {
     // Primary noise floor
     this->primaryNoiseFloor = this->primaryNoiseFloorCharacteristic->getValue<uint16_t>(nullptr, true);
 
+    // Primary wave speed
+    this->primaryWaveSpeed = this->primaryWaveSpeedCharacteristic->getValue<uint16_t>(nullptr, true);
+
+    // Primary wave period
+    this->primaryWavePeriod = this->primaryWavePeriodCharacteristic->getValue<uint16_t>(nullptr, true);
+
     // Secondary starting color
     temp = this->secondaryStartingColorCharacteristic->getValue<uint32_t>(nullptr, true);
     red = temp & 0xFF;
@@ -167,11 +179,11 @@ void BLE::updateExternParameters() {
         // Then, update the parameters of the strip object corresponding to the correct protocol
         if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
             this->controller->addWs2812x();
-            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds);
+            this->controller->segment_12->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds, this->primaryWaveSpeed, this->primaryWavePeriod);
         }
         else if (this->controller->protocol == "NeoEsp32Rmt0Ws2811Method") {
             this->controller->addWs2811();
-            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds);
+            this->controller->segment_11->setParameters(this->primaryStartingColor, this->primaryEndingColor, this->primarySensitivity, this->secondaryStartingColor, this->secondaryEndingColor, this->primarySpeed, this->secondarySpeed, this->protocol, this->primaryNoiseFloor, this->mode, this->numLeds, this->primaryWaveSpeed, this->primaryWavePeriod);
         }
     }
     return;
@@ -185,6 +197,8 @@ void BLE::printParameters() {
     Serial.println("Primary Vel: " + String(this->primarySpeed) + " ");
     Serial.println("Primary Sens: " + String(this->primarySensitivity) + " ");
     Serial.println("Primary Noise Floor: " + String(this->primaryNoiseFloor) + " ");
+    Serial.println("Primary Wave Speed: " + String(this->primaryWaveSpeed) + " ");
+    Serial.println("Primary Wave Period: " + String(this->primaryWavePeriod) + " ");
     Serial.println("Secondary Start Color: " + String(this->secondaryStartingColor[0]) + " " + String(this->secondaryStartingColor[1]) + " " + String(this->secondaryStartingColor[2]) + " ");
     Serial.println("Starting End Color: " + String(this->secondaryEndingColor[0]) + " " + String(this->secondaryEndingColor[1]) + " " + String(this->secondaryEndingColor[2]) + " ");
     Serial.println("Secondary Vel: " + String(this->secondarySpeed) + " ");
@@ -218,6 +232,8 @@ int BLE::saveParameters(Preferences *preferences) {
     preferences->putUShort("secSpeed", this->secondarySpeed);
     preferences->putUShort("priSens", this->primarySensitivity);
     preferences->putUShort("priNoiseFloor", this->primaryNoiseFloor);
+    preferences->putUShort("priWaveSpeed", this->primaryWaveSpeed);
+    preferences->putUShort("priWavePeriod", this->primaryWavePeriod);
     preferences->putString("protocol", this->protocol);
     preferences->putUChar("mode", this->mode);
     preferences->putUShort("numLeds", this->numLeds);
@@ -239,20 +255,22 @@ void BLE::sendParameters() {
         this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
-        tempColor = ((this->controller->segment_12->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_12->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_12->getPrimaryStartingColor())[0] << 8);
+        tempColor = ((this->controller->segment_12->getPrimaryStartingColor())[2] << 16) | ((this->controller->segment_12->getPrimaryStartingColor())[1] << 8) | ((this->controller->segment_12->getPrimaryStartingColor())[0]);
         this->primaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_12->getPrimaryEndingColor())[2] << 24) | ((this->controller->segment_12->getPrimaryEndingColor())[1] << 16) | ((this->controller->segment_12->getPrimaryEndingColor())[0] << 8);
+        tempColor = ((this->controller->segment_12->getPrimaryEndingColor())[2] << 16) | ((this->controller->segment_12->getPrimaryEndingColor())[1] << 8) | ((this->controller->segment_12->getPrimaryEndingColor())[0]);
         this->primaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other primary parameters
         this->primarySpeedCharacteristic->setValue(this->controller->segment_12->getPrimarySpeed());
         this->primarySensitivityCharacteristic->setValue(this->controller->segment_12->getPrimarySensitivity());
         this->primaryNoiseFloorCharacteristic->setValue(this->controller->segment_12->getPrimaryNoiseFloor());
+        this->primaryWaveSpeedCharacteristic->setValue(this->controller->segment_12->getPrimaryWaveSpeed());
+        this->primaryWavePeriodCharacteristic->setValue(this->controller->segment_12->getPrimaryWavePeriod());
    
         // Secondary colors
-        tempColor = ((this->controller->segment_12->getSecondaryStartingColor())[2] << 24) | ((this->controller->segment_12->getSecondaryStartingColor())[1] << 16) | ((this->controller->segment_12->getSecondaryStartingColor())[0] << 8);
+        tempColor = ((this->controller->segment_12->getSecondaryStartingColor())[2] << 16) | ((this->controller->segment_12->getSecondaryStartingColor())[1] << 8) | ((this->controller->segment_12->getSecondaryStartingColor())[0]);
         this->secondaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_12->getSecondaryEndingColor())[2] << 24) | ((this->controller->segment_12->getSecondaryEndingColor())[1] << 16) | ((this->controller->segment_12->getSecondaryEndingColor())[0] << 8);
+        tempColor = ((this->controller->segment_12->getSecondaryEndingColor())[2] << 16) | ((this->controller->segment_12->getSecondaryEndingColor())[1] << 8) | ((this->controller->segment_12->getSecondaryEndingColor())[0]);
         this->secondaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other secondary parameters
@@ -265,15 +283,17 @@ void BLE::sendParameters() {
         this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
-        tempColor = ((this->controller->segment_11->getPrimaryStartingColor())[2] << 24) | ((this->controller->segment_11->getPrimaryStartingColor())[1] << 16) | ((this->controller->segment_11->getPrimaryStartingColor())[0] << 8);
+        tempColor = ((this->controller->segment_11->getPrimaryStartingColor())[2] << 16) | ((this->controller->segment_11->getPrimaryStartingColor())[1] << 8) | ((this->controller->segment_11->getPrimaryStartingColor())[0]);
         this->primaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_11->getPrimaryEndingColor())[2] << 24) | ((this->controller->segment_11->getPrimaryEndingColor())[1] << 16) | ((this->controller->segment_11->getPrimaryEndingColor())[0] << 8);
+        tempColor = ((this->controller->segment_11->getPrimaryEndingColor())[2] << 16) | ((this->controller->segment_11->getPrimaryEndingColor())[1] << 8) | ((this->controller->segment_11->getPrimaryEndingColor())[0]);
         this->primaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other primary parameters
         this->primarySpeedCharacteristic->setValue(this->controller->segment_11->getPrimarySpeed());
         this->primarySensitivityCharacteristic->setValue(this->controller->segment_11->getPrimarySensitivity());
         this->primaryNoiseFloorCharacteristic->setValue(this->controller->segment_11->getPrimaryNoiseFloor());
+        this->primaryWaveSpeedCharacteristic->setValue(this->controller->segment_11->getPrimaryWaveSpeed());
+        this->primaryWavePeriodCharacteristic->setValue(this->controller->segment_11->getPrimaryWavePeriod());
    
         // Secondary colors
         tempColor = ((this->controller->segment_11->getSecondaryStartingColor())[2] << 24) | ((this->controller->segment_11->getSecondaryStartingColor())[1] << 16) | ((this->controller->segment_11->getSecondaryStartingColor())[0] << 8);

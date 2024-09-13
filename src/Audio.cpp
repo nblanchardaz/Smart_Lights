@@ -70,21 +70,24 @@ int MSGEQ7::calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t num
     if (temp < noiseConstant) {
         temp = noiseConstant;
     }
-    uint16_t res = ((temp - noiseConstant) * (numLeds / 2) / (4096));
-
-    // If we get a length greater than NUM_LEDS, then set it equal to NUM_LEDS
-    if (res > numLeds) {
-        res = numLeds;
-    }
+    uint16_t res = ((temp - noiseConstant) * (numLeds / 2) / (4096 - noiseConstant));
 
     // Now, factor in sensitivity.
     // sensitivty = 50 -> no transformation
     // sensitivty < 50 -> reduce length of res
     // sensitivity > 50 -> increase length of res
-    uint16_t effectiveSensitivty = sensitivity - 50;
+    uint16_t effectiveSensitivity = (sensitivity - 50); 
 
-    // Can be increased/decreased by up to a factor of 5.
-    this->len = res + res * sensitivity / 12.5;
+    // Can be increased by up to a factor of 5, or down to zero.
+    this->len = uint16_t(float(res) * pow(2, float(effectiveSensitivity) / 12.5));
+
+    // If we get a length greater than NUM_LEDS, then set it equal to NUM_LEDS
+    if (this->len > numLeds) {
+        this->len = numLeds;
+    }
+    else if (this->len < 0) {
+        this->len = 0;
+    }
 
     return this->len;
 }

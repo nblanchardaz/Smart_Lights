@@ -34,7 +34,7 @@ void setup() {
   uint8_t secondaryStartingBlue = preferences.getUChar("secStarBlue", 0);
   RgbColor secondaryStarting = RgbColor(secondaryStartingRed, secondaryStartingGreen, secondaryStartingBlue);
 
-  uint8_t secondaryEndingRed = preferences.getUChar("secondaryEndRed", 0);
+  uint8_t secondaryEndingRed = preferences.getUChar("secEndRed", 0);
   uint8_t secondaryEndingGreen = preferences.getUChar("secEndGreen", 0);
   uint8_t secondaryEndingBlue = preferences.getUChar("secEndBlue", 0);
   RgbColor secondaryEnding = RgbColor(secondaryEndingRed, secondaryEndingGreen, secondaryEndingBlue);
@@ -43,6 +43,8 @@ void setup() {
   uint16_t secondarySpeed = preferences.getUShort("secSpeed", 50);
   uint16_t primarySensitivity = preferences.getUShort("priSens", 50);
   uint16_t primaryNoiseFloor = preferences.getUShort("priNoiseFloor", 50);
+  uint16_t primaryWaveSpeed = preferences.getUShort("priWaveSpeed", 50);
+  uint16_t primaryWavePeriod = preferences.getUShort("priWavePeriod", 50);
   String protocol = preferences.getString("protocol", "NeoEsp32Rmt0Ws2811Method");
   uint8_t mode = preferences.getUChar("mode", 0);
   uint16_t numLeds = preferences.getUShort("numLeds", 150);
@@ -50,7 +52,7 @@ void setup() {
 
   // Initialize MasterLedController
   master.setProtocol(&protocol);
-  master.loadParams(&primaryStarting, &primaryEnding, &primarySpeed, &primarySensitivity, &primaryNoiseFloor, &secondaryStarting, &secondaryEnding, &secondarySpeed, &mode, &numLeds);
+  master.loadParams(&primaryStarting, &primaryEnding, &primarySpeed, &primarySensitivity, &primaryNoiseFloor, &secondaryStarting, &secondaryEnding, &secondarySpeed, &mode, &numLeds, &primaryWaveSpeed, &primaryWavePeriod);
 
   // Print initialized MasterLedController parameters
   master.printParameters();

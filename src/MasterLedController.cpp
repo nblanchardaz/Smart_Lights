@@ -25,7 +25,7 @@ void MasterLedController::setProtocol(String* _protocol) {
 
 // Initialize stored parameters based on what is dug up out of flash memory.
 // Function can ONLY BE CALLED ONCE. Because there's no protection to prevent segment_11 from creating a new LedStripSegment if it already exists.
-void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode, uint16_t* _numLeds) {
+void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _primaryEnding, uint16_t* _primarySpeed, uint16_t* _primarySensitivity, uint16_t* _primaryNoiseFloor, RgbColor* _secondaryStarting, RgbColor* _secondaryEnding, uint16_t* _secondarySpeed, uint8_t* _mode, uint16_t* _numLeds, uint16_t* _primaryWaveSpeed, uint16_t* _primaryWavePeriod) {
     
     // First, quantify the protocol
     uint8_t quant = (this->protocol == "NeoEsp32Rmt0Ws2812xMethod");
@@ -33,12 +33,12 @@ void MasterLedController::loadParams(RgbColor* _primaryStarting, RgbColor* _prim
         switch (quant) {
             case 0:
                 this->segment_11 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2811Method>(sigPinDef, 0, MAX_LEDS, 1);
-                this->segment_11->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds);
+                this->segment_11->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds, *_primaryWaveSpeed, *_primaryWavePeriod);
                 Serial.println("Initialized as Ws2811.");
                 break;
             case 1:
                 this->segment_12 = new LedStripSegment<NeoGrbFeature, NeoEsp32Rmt0Ws2812xMethod>(sigPinDef, 0, MAX_LEDS, 1);
-                this->segment_12->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds);
+                this->segment_12->setParameters(*_primaryStarting, *_primaryEnding, *_primarySensitivity, *_secondaryStarting, *_secondaryEnding, *_primarySpeed, *_secondarySpeed, this->protocol, *_primaryNoiseFloor, *_mode, *_numLeds, *_primaryWaveSpeed, *_primaryWavePeriod);
                 Serial.println("Initialized as Ws2812x.");
                 break;
             default:
@@ -85,6 +85,8 @@ void MasterLedController::printParameters() {
         Serial.println("Primary Vel: " + String(this->segment_11->getPrimarySpeed()) + " ");
         Serial.println("Primary Sens: " + String(this->segment_11->getPrimarySensitivity()) + " ");
         Serial.println("Primary Noise Floor: " + String(this->segment_11->getPrimaryNoiseFloor()) + " ");
+        Serial.println("Primary Wave Speed: " + String(this->segment_11->getPrimaryWaveSpeed()) + " ");
+        Serial.println("Primary Wave Period: " + String(this->segment_11->getPrimaryWavePeriod()) + " ");
         Serial.println("Secondary Start Color: " + String((this->segment_11->getSecondaryStartingColor())[0]) + " " + String((this->segment_11->getSecondaryStartingColor())[1]) + " " + String((this->segment_11->getSecondaryStartingColor())[2]) + " ");
         Serial.println("Starting End Color: " + String((this->segment_11->getSecondaryEndingColor())[0]) + " " + String((this->segment_11->getSecondaryEndingColor())[1]) + " " + String((this->segment_11->getSecondaryEndingColor())[2]) + " ");
         Serial.println("Secondary Vel: " + String(this->segment_11->getSecondarySpeed()) + " ");
@@ -99,8 +101,10 @@ void MasterLedController::printParameters() {
         Serial.println("Primary Vel: " + String(this->segment_12->getPrimarySpeed()) + " ");
         Serial.println("Primary Sens: " + String(this->segment_12->getPrimarySensitivity()) + " ");
         Serial.println("Primary Noise Floor: " + String(this->segment_12->getPrimaryNoiseFloor()) + " ");
+        Serial.println("Primary Wave Speed: " + String(this->segment_12->getPrimaryWaveSpeed()) + " ");
+        Serial.println("Primary Wave Period: " + String(this->segment_12->getPrimaryWavePeriod()) + " ");
         Serial.println("Secondary Start Color: " + String((this->segment_12->getSecondaryStartingColor())[0]) + " " + String((this->segment_12->getSecondaryStartingColor())[1]) + " " + String((this->segment_12->getSecondaryStartingColor())[2]) + " ");
-        Serial.println("Starting End Color: " + String((this->segment_12->getSecondaryEndingColor())[0]) + " " + String((this->segment_12->getSecondaryEndingColor())[1]) + " " + String((this->segment_12->getSecondaryEndingColor())[2]) + " ");
+        Serial.println("Secondary End Color: " + String((this->segment_12->getSecondaryEndingColor())[0]) + " " + String((this->segment_12->getSecondaryEndingColor())[1]) + " " + String((this->segment_12->getSecondaryEndingColor())[2]) + " ");
         Serial.println("Secondary Vel: " + String(this->segment_12->getSecondarySpeed()) + " ");
         Serial.println("Protocol: " + this->protocol);
         Serial.println("Mode: " + String(this->segment_12->getMode()));
@@ -122,17 +126,8 @@ void MasterLedController::calculateStrip() {
         // Calculate result of music reactivity
         this->chip->calculateLen(this->segment_12->getPrimarySensitivity(), this->segment_12->getPrimaryNoiseFloor(), this->segment_12->getNumLeds());
 
-        // Primary part of the segment (music reactivity)
-        for (int j = this->segment_12->start; j < this->chip->len; j++)
-        {
-            this->segment_12->SetPixelColor(j, this->generator->calculatePixel(this->segment_12->getMode(), this->segment_12->getPrimaryStartingColor(), this->segment_12->getPrimaryEndingColor(), this->segment_12->getPrimarySpeed()));
-        }
+        // TODO
 
-        // Secondary part of the segment (post music reactivity)
-        for (int j = this->chip->len; j < this->segment_12->end; j++)
-        {
-            this->segment_12->SetPixelColor(j, this->generator->calculatePixel(this->segment_12->getMode(), this->segment_12->getSecondaryStartingColor(), this->segment_12->getSecondaryEndingColor(), this->segment_12->getSecondarySpeed()));
-        }
     }
 
     // WS2811
@@ -141,17 +136,12 @@ void MasterLedController::calculateStrip() {
         // Calculate result of music reactivity
         this->chip->calculateLen(this->segment_11->getPrimarySensitivity(), this->segment_11->getPrimaryNoiseFloor(), this->segment_11->getNumLeds());
 
-        // Primary part of the segment (music reactivity)
-        for (int j = this->segment_11->start; j < this->chip->len; j++)
+        // Set pixel color for each pixel
+        for (uint16_t i = this->segment_11->start; i < this->segment_11->getNumLeds(); i++)
         {
-            this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getMode(), this->segment_11->getPrimaryStartingColor(), this->segment_11->getPrimaryEndingColor(), this->segment_11->getPrimarySpeed()));
+            this->segment_11->SetPixelColor(i, this->generator->calculatePixel(this->segment_11->getMode(), this->segment_11->getPrimaryStartingColor(), this->segment_11->getPrimaryEndingColor(), this->segment_11->getPrimarySpeed(), this->segment_11->getPrimaryWaveSpeed(), this->segment_11->getPrimaryWavePeriod(), this->segment_11->getSecondaryStartingColor(), this->segment_11->getSecondaryEndingColor(), this->segment_11->getSecondarySpeed(), i, this->segment_11->getNumLeds(), this->chip->len));
         }
 
-        // Secondary part of the segment (post music reactivity)
-        for (int j = this->chip->len; j < this->segment_11->end; j++)
-        {
-            this->segment_11->SetPixelColor(j, this->generator->calculatePixel(this->segment_11->getMode(), this->segment_11->getSecondaryStartingColor(), this->segment_11->getSecondaryEndingColor(), this->segment_11->getSecondarySpeed()));
-        }
     }
     else {
         Serial.println("Error calculating strip - protocol not recognized.");

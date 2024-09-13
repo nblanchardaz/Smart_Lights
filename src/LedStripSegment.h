@@ -57,7 +57,7 @@ class LedStripSegment {
             strip.Show();
         }
 
-        void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol, uint16_t _primaryNoiseFloor, uint8_t _mode, uint16_t _numLeds) {
+        void setParameters(RgbColor _primaryStarting, RgbColor _primaryEnding, uint16_t _primarySensitivity, RgbColor _secondaryStarting, RgbColor _secondaryEnding, uint16_t _primarySpeed, uint16_t _secondarySpeed, String _protocol, uint16_t _primaryNoiseFloor, uint8_t _mode, uint16_t _numLeds, uint16_t _primaryWaveSpeed, uint16_t _primaryWavePeriod) {
             
             primaryStarting = _primaryStarting;
             primaryEnding = _primaryEnding;
@@ -70,6 +70,8 @@ class LedStripSegment {
             primaryNoiseFloor = _primaryNoiseFloor;
             mode = _mode;
             numLeds = _numLeds;
+            primaryWaveSpeed = _primaryWaveSpeed;
+            primaryWavePeriod = _primaryWavePeriod;
 
             return;
         }
@@ -114,6 +116,14 @@ class LedStripSegment {
             return this->numLeds;
         }
 
+        uint16_t getPrimaryWaveSpeed() {
+            return this->primaryWaveSpeed;
+        }
+
+        uint16_t getPrimaryWavePeriod() {
+            return this->primaryWavePeriod;
+        }
+
         int start; ///< The start position of the segment.
         int end;   ///< The end position of the segment.
 
@@ -125,11 +135,13 @@ class LedStripSegment {
         RgbColor primaryEnding = RgbColor(0, 0, 0);
         RgbColor secondaryStarting = RgbColor(0, 0, 0);
         RgbColor secondaryEnding = RgbColor(0, 0, 0);
-        uint16_t primarySpeed = 0;
-        uint16_t secondarySpeed = 0;
-        uint16_t primarySensitivity = 0;
-        uint16_t primaryNoiseFloor = 0;
+        uint16_t primarySpeed = 50;
+        uint16_t secondarySpeed = 50;
+        uint16_t primarySensitivity = 50;
+        uint16_t primaryNoiseFloor = 50;
         String protocol = "NeoEsp32Rmt0Ws2811Method";
         uint8_t mode = 0;
         uint16_t numLeds = 150;
+        uint16_t primaryWaveSpeed = 50;
+        uint16_t primaryWavePeriod = 50;
 };
