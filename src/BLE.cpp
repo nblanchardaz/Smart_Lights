@@ -245,7 +245,8 @@ int BLE::saveParameters(Preferences *preferences) {
 // Update BLE characteristics with the values BLE is initialized to.
 void BLE::sendParameters() {
 
-    int tempColor;
+    std::vector<uint8_t> tempColor(4, 0x00);
+    tempColor[3] = 0x00;
 
     if (this->controller->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
         // Top selectors
@@ -255,9 +256,13 @@ void BLE::sendParameters() {
         this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
-        tempColor = ((this->controller->segment_12->getPrimaryStartingColor())[2] << 16) | ((this->controller->segment_12->getPrimaryStartingColor())[1] << 8) | ((this->controller->segment_12->getPrimaryStartingColor())[0]);
+        tempColor[2] = (this->controller->segment_12->getPrimaryStartingColor()[2]);
+        tempColor[1] = (this->controller->segment_12->getPrimaryStartingColor()[1]);
+        tempColor[0] = (this->controller->segment_12->getPrimaryStartingColor()[0]);
         this->primaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_12->getPrimaryEndingColor())[2] << 16) | ((this->controller->segment_12->getPrimaryEndingColor())[1] << 8) | ((this->controller->segment_12->getPrimaryEndingColor())[0]);
+        tempColor[2] = (this->controller->segment_12->getPrimaryEndingColor()[2]);
+        tempColor[1] = (this->controller->segment_12->getPrimaryEndingColor()[1]);
+        tempColor[0] = (this->controller->segment_12->getPrimaryEndingColor()[0]);
         this->primaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other primary parameters
@@ -268,9 +273,13 @@ void BLE::sendParameters() {
         this->primaryWavePeriodCharacteristic->setValue(this->controller->segment_12->getPrimaryWavePeriod());
    
         // Secondary colors
-        tempColor = ((this->controller->segment_12->getSecondaryStartingColor())[2] << 16) | ((this->controller->segment_12->getSecondaryStartingColor())[1] << 8) | ((this->controller->segment_12->getSecondaryStartingColor())[0]);
+        tempColor[2] = (this->controller->segment_12->getSecondaryStartingColor()[2]);
+        tempColor[1] = (this->controller->segment_12->getSecondaryStartingColor()[1]);
+        tempColor[0] = (this->controller->segment_12->getSecondaryStartingColor()[0]);
         this->secondaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_12->getSecondaryEndingColor())[2] << 16) | ((this->controller->segment_12->getSecondaryEndingColor())[1] << 8) | ((this->controller->segment_12->getSecondaryEndingColor())[0]);
+        tempColor[2] = (this->controller->segment_12->getSecondaryEndingColor()[2]);
+        tempColor[1] = (this->controller->segment_12->getSecondaryEndingColor()[1]);
+        tempColor[0] = (this->controller->segment_12->getSecondaryEndingColor()[0]);
         this->secondaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other secondary parameters
@@ -283,9 +292,13 @@ void BLE::sendParameters() {
         this->protocolCharacteristic->setValue(this->controller->protocol == "NeoEsp32Rmt0Ws2811Method");
 
         // Primary colors
-        tempColor = ((this->controller->segment_11->getPrimaryStartingColor())[2] << 16) | ((this->controller->segment_11->getPrimaryStartingColor())[1] << 8) | ((this->controller->segment_11->getPrimaryStartingColor())[0]);
+        tempColor[2] = (this->controller->segment_11->getPrimaryStartingColor()[2]);
+        tempColor[1] = (this->controller->segment_11->getPrimaryStartingColor()[1]);
+        tempColor[0] = (this->controller->segment_11->getPrimaryStartingColor()[0]);
         this->primaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_11->getPrimaryEndingColor())[2] << 16) | ((this->controller->segment_11->getPrimaryEndingColor())[1] << 8) | ((this->controller->segment_11->getPrimaryEndingColor())[0]);
+        tempColor[2] = (this->controller->segment_11->getPrimaryEndingColor()[2]);
+        tempColor[1] = (this->controller->segment_11->getPrimaryEndingColor()[1]);
+        tempColor[0] = (this->controller->segment_11->getPrimaryEndingColor()[0]);
         this->primaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other primary parameters
@@ -296,9 +309,13 @@ void BLE::sendParameters() {
         this->primaryWavePeriodCharacteristic->setValue(this->controller->segment_11->getPrimaryWavePeriod());
    
         // Secondary colors
-        tempColor = ((this->controller->segment_11->getSecondaryStartingColor())[2] << 24) | ((this->controller->segment_11->getSecondaryStartingColor())[1] << 16) | ((this->controller->segment_11->getSecondaryStartingColor())[0] << 8);
+        tempColor[2] = (this->controller->segment_11->getSecondaryStartingColor()[2]);
+        tempColor[1] = (this->controller->segment_11->getSecondaryStartingColor()[1]);
+        tempColor[0] = (this->controller->segment_11->getSecondaryStartingColor()[0]);
         this->secondaryStartingColorCharacteristic->setValue(tempColor);
-        tempColor = ((this->controller->segment_11->getSecondaryEndingColor())[2] << 24) | ((this->controller->segment_11->getSecondaryEndingColor())[1] << 16) | ((this->controller->segment_11->getSecondaryEndingColor())[0] << 8);
+        tempColor[2] = (this->controller->segment_11->getSecondaryEndingColor()[2]);
+        tempColor[1] = (this->controller->segment_11->getSecondaryEndingColor()[1]);
+        tempColor[0] = (this->controller->segment_11->getSecondaryEndingColor()[0]);
         this->secondaryEndingColorCharacteristic->setValue(tempColor);
 
         // Other secondary parameters

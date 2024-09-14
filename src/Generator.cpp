@@ -150,7 +150,133 @@ RgbColor Generator::calculatePixel(uint8_t mode, RgbColor primaryStartingColor, 
             return RgbColor(new_color[1], new_color[0], new_color[2]);
             break;
         }
-        // Return white if invalid mode is supplied
+
+        // Classic centered (2) mode
+        // Primary segment length is proportional to detected music amplitude. The rest of the strip is the secondary segment. Both segments oscillate between their respective
+        // starting and ending colors. Primary segment spawns from the center.
+        case 2: {
+            // Let's use a sine function to create a smooth transition from startinColor, to endingColor, and back in an infinite loop.
+            // component = a * sin( time ) + b
+
+            // First, determine if we are in the primary (music reactive) or secondary (non music reactive) portion of the strip
+            RgbColor startingColor;
+            RgbColor endingColor;
+            uint16_t velocity;
+            if (abs(index - numLeds/2) < (musicLen / 2)) {
+                startingColor = primaryStartingColor;
+                endingColor = primaryEndingColor;
+                velocity = primaryVelocity;
+            }
+            else {
+                startingColor = secondaryStartingColor;
+                endingColor = secondaryEndingColor;
+                velocity = secondaryVelocity;
+            }
+
+            // a represents how much we need to add to startingColor to reach endingColor when our sine wave is at +1, divided by two.
+            float a[3];
+            a[0] = float(startingColor[0] - endingColor[0]) / -2.0;
+            a[1] = float(startingColor[1] - endingColor[1]) / -2.0;
+            a[2] = float(startingColor[2] - endingColor[2]) / -2.0;
+
+            // b represents our starting point (midpoint between startingColor and endingColor).
+            uint16_t b[3];
+            b[0] = startingColor[0] + a[0];
+            b[1] = startingColor[1] + a[1];
+            b[2] = startingColor[2] + a[2];
+
+            // Now, let's generate our new color component values using the equation above.
+            // At a velocity value of 1 (lowest possible), it will take 60 seconds to complete the cycle.
+            uint16_t new_color[3];
+            new_color[0] = a[0] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[0];
+            new_color[1] = a[1] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[1];
+            new_color[2] = a[2] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[2];
+
+            return RgbColor(new_color[1], new_color[0], new_color[2]);
+            break;
+        }
+
+        // Classic mirrored (3) mode
+        // Primary segment length is proportional to detected music amplitude. The rest of the strip is the secondary segment. Both segments oscillate between their respective
+        // starting and ending colors. Primary segments spawn on both ends of the strip.
+        case 3: {
+            // Let's use a sine function to create a smooth transition from startinColor, to endingColor, and back in an infinite loop.
+            // component = a * sin( time ) + b
+
+            // First, determine if we are in the primary (music reactive) or secondary (non music reactive) portion of the strip
+            RgbColor startingColor;
+            RgbColor endingColor;
+            uint16_t velocity;
+            if ( (index) < (musicLen / 2) || (numLeds - index) < (musicLen / 2) ) {
+                startingColor = primaryStartingColor;
+                endingColor = primaryEndingColor;
+                velocity = primaryVelocity;
+            }
+            else {
+                startingColor = secondaryStartingColor;
+                endingColor = secondaryEndingColor;
+                velocity = secondaryVelocity;
+            }
+
+            // a represents how much we need to add to startingColor to reach endingColor when our sine wave is at +1, divided by two.
+            float a[3];
+            a[0] = float(startingColor[0] - endingColor[0]) / -2.0;
+            a[1] = float(startingColor[1] - endingColor[1]) / -2.0;
+            a[2] = float(startingColor[2] - endingColor[2]) / -2.0;
+
+            // b represents our starting point (midpoint between startingColor and endingColor).
+            uint16_t b[3];
+            b[0] = startingColor[0] + a[0];
+            b[1] = startingColor[1] + a[1];
+            b[2] = startingColor[2] + a[2];
+
+            // Now, let's generate our new color component values using the equation above.
+            // At a velocity value of 1 (lowest possible), it will take 60 seconds to complete the cycle.
+            uint16_t new_color[3];
+            new_color[0] = a[0] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[0];
+            new_color[1] = a[1] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[1];
+            new_color[2] = a[2] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[2];
+
+            return RgbColor(new_color[1], new_color[0], new_color[2]);
+            break;
+        }
+
+        // Strobe (4) mode
+        // There is only a primary segment, no secondayr segment. Lights are on the starting color by default and approach
+        // the ending color as music reactivity increases.
+        case 4: {
+            
+            // Stores our new color
+            uint16_t new_color[3];
+
+            // Stores out starting params
+            RgbColor startingColor;
+            RgbColor endingColor;
+            uint16_t velocity;
+
+            // Primary -> music reactive
+            startingColor = primaryStartingColor;
+            endingColor = primaryEndingColor;
+            velocity = primaryVelocity;
+
+            // a represents how much we need to add to startingColor to reach endingColor. Let's scale this value by the music length, and then add it to
+            // startingColor to get our new color. A maximum length of numLeds means we are exactly at SecondaryColor, and a minimum length of 0 means
+            // we are exactly at StartingColor;
+            float a[3];
+            a[0] = float(startingColor[0] - endingColor[0]) * float(musicLen) / float(numLeds) * -1;
+            a[1] = float(startingColor[1] - endingColor[1]) * float(musicLen) / float(numLeds) * -1;
+            a[2] = float(startingColor[2] - endingColor[2]) * float(musicLen) / float(numLeds) * -1;
+
+            // Now, we just need to add our calculated offsets to the starting color.
+            new_color[0] = startingColor[0] + a[0];
+            new_color[1] = startingColor[1] + a[1];
+            new_color[2] = startingColor[2] + a[2];
+
+            return RgbColor(new_color[1], new_color[0], new_color[2]);
+            break;
+        }
+
+        // Default: Return white if invalid mode is supplied
         default: {
             return RgbColor(255, 255, 255);
             break;
