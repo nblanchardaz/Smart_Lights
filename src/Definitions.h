@@ -23,3 +23,5 @@
 
 #define FIRMWARE_VERSION "0.0.9"
 #define firmwareVersionUUID uint16_t(10)       // MUST BE 16, 32, or 128 BITS
+
+#define MSGEQ7_FLAG 0                           // MSGEQ7 present?

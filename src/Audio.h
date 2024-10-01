@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <NeopixelBus.h>
 
-class MSGEQ7 {
+class Processor {
 
     public:
 
@@ -14,10 +14,12 @@ class MSGEQ7 {
         uint16_t len;
         
         // Constructor
-        MSGEQ7(int reset, int strobe, int dcOut);
+        Processor(int reset, int strobe, int dcOut, bool MSGEQ7flag);
 
         // Read results
         int getResults();
+        int readMSGEQ7();
+        int readGPIO();
 
         // Calculate how many pixels to affect
         int calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t numLeds);
@@ -27,9 +29,16 @@ class MSGEQ7 {
         // ESP32 pin numbers being used by MSGEQ7
         int resetPin;
         int strobePin;
-        int dcOutPin;
+
+        // Pin data is read from
+        int dataInPin;
 
         // Array to store results of 7-bin FFT
         uint16_t fft[7];
 
+        // Flag for whether MSGEQ7 is used or not
+        bool MSGEQ7flag;
+
 };
+
+inline int square(int x);

@@ -82,7 +82,7 @@ RgbColor Generator::calculatePixel(uint8_t mode, RgbColor primaryStartingColor, 
             // wave speed = 50 -> no transformation
             // wave speed < 50 -> slower
             // wave speed > 50 -> faster
-            uint16_t effectiveWaveSpeed = primaryWaveSpeed - 20;
+            uint16_t effectiveWaveSpeed = primaryWaveSpeed - 50;
 
             // We need a time factor, which will be transformed by our effective wave speed.
             // Default: wave will shift by 1 pixel every 0.5 seconds
@@ -121,7 +121,7 @@ RgbColor Generator::calculatePixel(uint8_t mode, RgbColor primaryStartingColor, 
                 new_color[1] = startingColor[1] + a[1];
                 new_color[2] = startingColor[2] + a[2];
             }
-            else if (sinVal < 0) {
+            else {
 
                 // Secondary -> not music reactive
                 startingColor = secondaryStartingColor;
@@ -147,6 +147,7 @@ RgbColor Generator::calculatePixel(uint8_t mode, RgbColor primaryStartingColor, 
                 new_color[2] = a[2] * sin( 2 * PI * velocity * float(millis()) / 1000.0 / 60.0 ) + b[2];
             }
 
+            Serial.println("Waves retuning: " + String(new_color[1]) + " " + String(new_color[0]) + " " + String(new_color[2]));
             return RgbColor(new_color[1], new_color[0], new_color[2]);
             break;
         }

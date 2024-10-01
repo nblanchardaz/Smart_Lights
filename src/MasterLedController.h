@@ -10,7 +10,7 @@ class MasterLedController {
 
     private:
         MasterLedController();
-        MSGEQ7 *chip = new MSGEQ7(resetPinDef, strobePinDef, dcOutPinDef);
+        Processor *chip = new Processor(resetPinDef, strobePinDef, dcOutPinDef, MSGEQ7_FLAG);
         Generator *generator = new Generator();
         void showStrip();
 

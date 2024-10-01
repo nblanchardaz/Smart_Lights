@@ -119,6 +119,7 @@ void MasterLedController::calculateStrip() {
 
     // To enable music reactivity:
     this->chip->getResults();
+    Serial.println(this->chip->len);
 
     // WS2812x
     if (this->protocol == "NeoEsp32Rmt0Ws2812xMethod") {
