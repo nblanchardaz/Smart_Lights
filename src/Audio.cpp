@@ -65,7 +65,7 @@ int Processor::readGPIO(void) {
 
     // Energy calculation stage
     avg = avg >> 7;          // Finish average calculation (divide by 128)
-    for (uint8_t i = 0; i < 100; i++) {
+    for (uint8_t i = 0; i < 128; i++) {
         power = power + square((measurements[i] - avg));
     }
     power = power >> 7;
@@ -135,14 +135,25 @@ int Processor::calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t 
     int16_t effectiveSensitivity = (sensitivity - 50); 
 
     // Can be increased by up to a factor of 5, or down to zero.
-    this->len = uint16_t(float(res) * pow(2, float(effectiveSensitivity) / 12.5));
+    res = uint16_t(float(res) * pow(2, float(effectiveSensitivity) / 12.5));
 
     // If we get a length greater than NUM_LEDS, then set it equal to NUM_LEDS
-    if (this->len > numLeds) {
-        this->len = numLeds;
+    if (res > numLeds) {
+        res = numLeds;
     }
-    else if (this->len < 0) {
-        this->len = 0;
+    else if (res < 0) {
+        res = 0;
+    }
+
+    // As a feature to only change the length of the strip by a single pixel per time:
+    if (res < this->len) {
+        this->len = this->len - 1;
+    }
+    else if (res > this-> len) {
+        this->len = this->len + 1;
+    }
+    else {
+        this->len = this->len;
     }
 
     return this->len;
