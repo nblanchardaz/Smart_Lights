@@ -82,4 +82,7 @@ void loop() {
   // Calculate pixel values and show the results on the strip
   master.doStuff();
 
+  // Debug
+  // delay(10000);
+
 }

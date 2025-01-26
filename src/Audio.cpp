@@ -43,41 +43,57 @@ int Processor::readGPIO(void) {
     // NOTE: Powers of 2 (namely 128) are used here to create easy division via right shift operator and avoid
     // costly floating point calculations.
 
-    // Calculate the power of the incoming signal by taking 128 measurments over a 5 ms period
-    // (5 ms is the period of a 20Hz signal, the lowest frequency we are interested in measuring)
-    uint16_t measurements[128];  // 16 bits is enough to store the ADC results which are 12 bit resolution
+    // Calculate the power of the incoming signal by taking 512 measurments over a 25 ms period
+    // (50 ms is the period of a 20Hz signal, the lowest frequency we are interested in measuring)
+    uint16_t measurements[512];  // 16 bits is enough to store the ADC results which are 12 bit resolution
     uint32_t avg = 0;            // Running average of measurements; used for power calculation.
     uint32_t power = 0;
     float result;
     uint16_t resultInt;
 
     // Measurement stage
-    for (uint8_t i  = 0; i < 128; i++) {
+    for (uint16_t i  = 0; i < 512; i++) {
         // Take measurement
         measurements[i] = analogRead(this->dataInPin);
 
         // Add to average
         avg = avg + measurements[i];
 
-        // Wait 39 us
-        delayMicroseconds(39);
+        // Debug
+        // Serial.print("GPIO: ");
+        // Serial.println(measurements[i]);
+
+        // Wait 50 us
+        delayMicroseconds(50);
     }
 
     // Energy calculation stage
-    avg = avg >> 7;          // Finish average calculation (divide by 128)
-    for (uint8_t i = 0; i < 128; i++) {
+    avg = avg >> 9;          // Finish average calculation (divide by 512)
+    // Serial.print("Average GPIO measurement: ");
+    // Serial.println(avg);
+
+    for (uint16_t i = 0; i < 512; i++) {
         power = power + square((measurements[i] - avg));
     }
-    power = power >> 7;
+
+    // Serial.print("Power prior to shifting: ");
+    // Serial.println(power);
+    power = power >> 9;
+    // Serial.print("Power after shifting: ");
+    // Serial.println(power);
 
     // Normalizing power
-    result = power / 8388608.0; // Maximum power achievable (3.3V peak-to-peak)
+    result = power / 2097152.0; // 8388608.0; // Maximum power achievable (3.3V peak-to-peak)
+    // Serial.print("Normalized power: ");
+    // Serial.println(result);
 
     // Translating power back into a scale of 0 to 4096
     resultInt = result * 4096;
     this->fft[0] = resultInt;
     this->fft[1] = resultInt;
 
+    Serial.print("Read GPIO result: ");
+    Serial.println(resultInt);
     return resultInt;
 }
 
@@ -156,6 +172,8 @@ int Processor::calculateLen(uint16_t sensitivity, uint16_t noiseFloor, uint16_t 
         this->len = this->len;
     }
 
+    Serial.print("Length: ");
+    Serial.println(this->len);
     return this->len;
 }
 

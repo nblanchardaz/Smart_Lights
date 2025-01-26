@@ -21,7 +21,8 @@
 #define SERVICE_UUID uint16_t(1234)            // MUST BE 16, 32, or 128 BITS
 #define DEVICE_NAME "LED CONTROLLER"
 
-#define FIRMWARE_VERSION "0.0.9"
-#define firmwareVersionUUID uint16_t(10)       // MUST BE 16, 32, or 128 BITS
+#define FIRMWARE_VERSION "0.1.9"                // WITH MSGEQ7:     x.0.x
+                                                // WITHOUT MSGEQ7:  x.1.x
+#define firmwareVersionUUID uint16_t(10)        // MUST BE 16, 32, or 128 BITS
 
 #define MSGEQ7_FLAG 0                           // MSGEQ7 present?
